@@ -7,7 +7,5 @@ import pro.sky.telegrambotshelter.model.Shelter;
 /**репозиторий для работы с БД приютов*/
 @Repository
 public interface ShelterRepository extends JpaRepository<Shelter, Long> {
-
-    /**метод для поиска приюта по типу*/
     Shelter findShelterByShelterType(String shelterType);
 }

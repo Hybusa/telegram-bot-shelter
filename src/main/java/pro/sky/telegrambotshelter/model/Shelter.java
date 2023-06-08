@@ -30,9 +30,9 @@ public class Shelter {
 
     private String schedule;
 
-    private String address;
-
     private String getHowToGet;
+
+    private String address;
 
     private String securityAndPass;
 

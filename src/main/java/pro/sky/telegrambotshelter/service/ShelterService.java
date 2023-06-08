@@ -3,7 +3,7 @@ package pro.sky.telegrambotshelter.service;
 import org.springframework.stereotype.Service;
 import pro.sky.telegrambotshelter.repository.ShelterRepository;
 
-/**сервис для работы с БД приютов*/
+/**класс для работы с БД приютов*/
 @Service
 public class ShelterService {
     private final ShelterRepository shelterRepository;

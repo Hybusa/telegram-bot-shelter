@@ -23,7 +23,7 @@ public class Pet {
     private User user;
 
     @OneToOne
-    @JoinColumn(name = "shlters_id")
+    @JoinColumn(name = "shelters_id")
     private Shelter shelter;
 
     public Pet() {

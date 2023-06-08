@@ -1,12 +1,9 @@
 package pro.sky.telegrambotshelter.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name="pets")
 public class Pet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -14,15 +11,18 @@ public class Pet {
 
     private String name;
     private int age;
+
     private String shortInfo;
+
     private int rejections;
+
+    private String disabilityRecommendations;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
     @OneToOne
-    @JsonIgnore
     @JoinColumn(name = "shelters_id")
     private Shelter shelter;
 
@@ -32,12 +32,14 @@ public class Pet {
     public Pet(String name,
                int age,
                String shortInfo,
+               String disabilityRecommendations,
                User user,
                Shelter shelter) {
         this.name = name;
         this.age = age;
         this.shortInfo = shortInfo;
         this.rejections = 0;
+        this.disabilityRecommendations = disabilityRecommendations;
         this.user = user;
         this.shelter = shelter;
     }
@@ -82,6 +84,14 @@ public class Pet {
         this.rejections = rejections;
     }
 
+    public String getDisabilityRecommendations() {
+        return disabilityRecommendations;
+    }
+
+    public void setDisabilityRecommendations(String disabilityRecommendations) {
+        this.disabilityRecommendations = disabilityRecommendations;
+    }
+
     public User getUser() {
         return user;
     }
@@ -107,6 +117,7 @@ public class Pet {
                 && rejections == pet.rejections
                 && Objects.equals(name, pet.name)
                 && Objects.equals(shortInfo, pet.shortInfo)
+                && Objects.equals(disabilityRecommendations, pet.disabilityRecommendations)
                 && Objects.equals(user, pet.user)
                 && Objects.equals(shelter, pet.shelter);
     }
@@ -116,6 +127,7 @@ public class Pet {
         return Objects.hash(age,
                 shortInfo,
                 rejections,
+                disabilityRecommendations,
                 user,
                 shelter);
     }

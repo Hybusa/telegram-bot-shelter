@@ -1,7 +1,5 @@
 package pro.sky.telegrambotshelter.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import javax.persistence.*;
 import java.util.Objects;
 
@@ -10,7 +8,6 @@ import java.util.Objects;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
     private String name;
@@ -21,11 +18,6 @@ public class User {
 
     private boolean failed;
 
-    private String shelterTypeChoice;
-
-    @ManyToOne
-    @JsonIgnore
-    private Shelter shelter;
 
     public User() {
     }
@@ -55,10 +47,6 @@ public class User {
         return chatId;
     }
 
-    public String getShelterTypeChoice() {
-        return shelterTypeChoice;
-    }
-
     public void setChatId(Long chatId) {
         this.chatId = chatId;
     }
@@ -77,18 +65,6 @@ public class User {
 
     public void setFailed(boolean failed) {
         this.failed = failed;
-    }
-
-    public void setShelterTypeChoice(String shelterTypeChoice) {
-        this.shelterTypeChoice = shelterTypeChoice;
-    }
-
-    public Shelter getShelter() {
-        return shelter;
-    }
-
-    public void setShelter(Shelter shelter) {
-        this.shelter = shelter;
     }
 
     @Override

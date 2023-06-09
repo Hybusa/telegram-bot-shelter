@@ -119,7 +119,7 @@ INSERT INTO shelters (id, volunteer_chat_id, shelter_type, meeting_recommendatio
                       documents_list, general_info, phone_number, schedule, address, how_to_get,
                       security_and_pass, safety, transporting_recommendations, home_recommendations_young,
                       home_recommendations_old, cynologist_recommendations, why_we_can_deny)
-VALUES (0, '-1001755211667', 'dogs',
+VALUES (0, '0', 'dogs',
         'Важно, чтобы между вами и выбранным вами пушистым другом была связь.
         Вы должны убедиться, что новый член вашей семьи будет успешно адаптироваться к вашему образу жизни.
         Чтобы привести в дом подходящую собаку и убедиться, что ваш образ жизни идеален для вашего нового питомца, необходимы тщательные исследования и планирование.
@@ -169,7 +169,7 @@ INSERT INTO shelters (id, volunteer_chat_id, shelter_type, meeting_recommendatio
                       documents_list, general_info, phone_number, schedule, address, how_to_get,
                       security_and_pass, safety, transporting_recommendations, home_recommendations_young,
                       home_recommendations_old, why_we_can_deny)
-VALUES (1, '-1001642704509', 'cats',
+VALUES (1, '1', 'cats',
         'Важно, чтобы между вами и выбранным вами пушистым другом была связь.
         Вы должны убедиться, что новый член вашей семьи будет успешно адаптироваться к вашему образу жизни.
         Чтобы привести в дом подходящую кошку и убедиться, что ваш образ жизни идеален для вашего нового питомца, необходимы тщательные исследования и планирование.

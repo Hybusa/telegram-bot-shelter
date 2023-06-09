@@ -5,7 +5,7 @@ CREATE TABLE users
 (
     id      INTEGER PRIMARY KEY,
     name    VARCHAR(255),
-    chat_id VARCHAR(255),
+    chat_id bigint,
     contact VARCHAR(255),
     failed  BOOLEAN
 );
@@ -13,7 +13,7 @@ CREATE TABLE users
 CREATE TABLE shelters
 (
     id                           INTEGER PRIMARY KEY,
-    volunteer_chat_id            VARCHAR(255),
+    volunteer_chat_id            bigint,
     shelter_type                 VARCHAR(255),
     meeting_recommendations      VARCHAR(255),
     how_to_get_pet               VARCHAR(255),

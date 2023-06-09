@@ -4,6 +4,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
+@Table(name="pets")
 public class Pet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -11,11 +12,8 @@ public class Pet {
 
     private String name;
     private int age;
-
     private String shortInfo;
-
     private int rejections;
-
     private String disabilityRecommendations;
 
     @ManyToOne

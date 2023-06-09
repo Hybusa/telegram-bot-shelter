@@ -4,10 +4,6 @@ import org.springframework.stereotype.Service;
 import pro.sky.telegrambotshelter.model.User;
 import pro.sky.telegrambotshelter.repository.UserRepository;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 /**сервис для работы с пользователем*/
 @Service
 public class UserService {
@@ -30,16 +26,6 @@ public class UserService {
     /**метод для получения контакта пользователя*/
     public String getUserPhone(Long chatId){
         return userRepository.findUserByChatId(chatId).getContact();
-    }
-
-    /**метод для получения мапы с chat_id пользователей*/
-    public Map<Long, String> getMapUsersChatId() {
-        Map<Long, String> usersId = new HashMap<>();
-        List<Long> usId = userRepository.listChatIdUsers();
-        for (Long ignored : usId) {
-            usersId.put(ignored, null);
-        }
-        return usersId;
     }
 
 }

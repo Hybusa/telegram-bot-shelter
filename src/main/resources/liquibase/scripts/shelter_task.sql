@@ -3,21 +3,20 @@
 -- changeset akuznetsov:1
 CREATE TABLE users
 (
-    id                  SERIAL PRIMARY KEY,
-    name                VARCHAR(255),
-    chat_id             bigint,
-    contact             VARCHAR(255),
-    shelter_type_choice VARCHAR(255),
-    failed              BOOLEAN
+    id      INTEGER PRIMARY KEY,
+    name    VARCHAR(255),
+    chat_id VARCHAR(255),
+    contact VARCHAR(255),
+    failed  BOOLEAN
 );
 
 CREATE TABLE shelters
 (
-    id                           SERIAL PRIMARY KEY,
-    volunteer_chat_id            bigint,
+    id                           INTEGER PRIMARY KEY,
+    volunteer_chat_id            VARCHAR(255),
     shelter_type                 VARCHAR(255),
-    meeting_recommendations      VARCHAR(1000),
-    how_to_get_pet               VARCHAR(1000),
+    meeting_recommendations      VARCHAR(255),
+    how_to_get_pet               VARCHAR(255),
     documents_list               VARCHAR(255),
     general_info                 VARCHAR(255),
     phone_number                 VARCHAR(255),
@@ -25,26 +24,23 @@ CREATE TABLE shelters
     address                      VARCHAR(255),
     how_to_get                   VARCHAR(255),
     security_and_pass            VARCHAR(255),
-    safety                       VARCHAR(1000),
-    transporting_recommendations VARCHAR(1000),
-    home_recommendations_young   VARCHAR(1000),
-    home_recommendations_old     VARCHAR(1000),
-    cynologist_recommendations   VARCHAR(4000),
-    list_of_cynologists          VARCHAR(255),
-    disability_recommendations   VARCHAR(255),
+    safety                       VARCHAR(255),
+    transporting_recommendations VARCHAR(255),
+    home_recommendations_young   VARCHAR(255),
+    home_recommendations_old     VARCHAR(255),
+    cynologist_recommendations   VARCHAR(255),
     why_we_can_deny              VARCHAR(255),
-    CONSTRAINT chk_cynologist_recommendations CHECK (shelter_type = 'dogs' OR cynologist_recommendations IS NULL),
-    CONSTRAINT chk_list_of_cynologists CHECK (shelter_type = 'dogs' OR list_of_cynologists IS NULL)
+    CONSTRAINT chk_cynologist_recommendations CHECK (shelter_type = 'dogs' OR cynologist_recommendations IS NULL)
 );
-
 
 CREATE TABLE pets
 (
-    id                         SERIAL PRIMARY KEY,
+    id                         INTEGER PRIMARY KEY,
     name                       VARCHAR(255),
     age                        INTEGER,
     short_info                 VARCHAR(255),
     rejections                 INTEGER,
+    disability_recommendations VARCHAR(255),
     user_id                    INTEGER,
     shelters_id                INTEGER,
     FOREIGN KEY (user_id) REFERENCES users (id),
@@ -54,7 +50,7 @@ CREATE TABLE pets
 
 CREATE TABLE adopted_cats
 (
-    id               SERIAL PRIMARY KEY,
+    id               INTEGER PRIMARY KEY,
     id_pet           INTEGER,
     id_user          INTEGER,
     period_start     timestamptz,
@@ -66,7 +62,7 @@ CREATE TABLE adopted_cats
 
 CREATE TABLE adopted_dogs
 (
-    id               SERIAL PRIMARY KEY,
+    id               INTEGER PRIMARY KEY,
     id_pet           INTEGER,
     id_user          INTEGER,
     period_start     timestamptz,
@@ -75,7 +71,6 @@ CREATE TABLE adopted_dogs
     FOREIGN KEY (id_pet) REFERENCES pets (id),
     FOREIGN KEY (id_user) REFERENCES users (id)
 );
-
 -- changeset akuznetsov:2
 SELECT *
 FROM users
@@ -104,41 +99,27 @@ FROM users
          JOIN pets ON users.id = pets.user_id
          JOIN shelters ON pets.shelters_id = shelters.id;
 
--- changeset a.sychkova:3
-CREATE TABLE contacts_for_cats_shelter
+-- changeset akuznetsov:3
+CREATE TABLE user_shelter_join
 (
-    user_id SERIAL PRIMARY KEY,
-    name    VARCHAR,
-    contact VARCHAR,
-    FOREIGN KEY (user_id) REFERENCES users (id)
+    user_id                       INTEGER REFERENCES users(id),
+    shelter_id                    INTEGER REFERENCES shelters(id)
 );
 
-SELECT *
-FROM users
-         JOIN contacts_for_cats_shelter cFCS on users.id = cFCS.user_id;
-
--- changeset a.sychkova:4
-CREATE TABLE contacts_for_dogs_shelter
-(
-    user_id SERIAL PRIMARY KEY,
-    name    VARCHAR,
-    contact VARCHAR,
-    FOREIGN KEY (user_id) REFERENCES users (id)
-);
-
-SELECT *
-FROM users
-         JOIN contacts_for_dogs_shelter cFDS on users.id = cFDS.user_id;
-
-
-
--- changeset m_yatsushko:5
+-- changeset m_yatsushko:4
+ALTER TABLE shelters ALTER COLUMN meeting_recommendations TYPE varchar(1000);
+ALTER TABLE shelters ALTER COLUMN how_to_get_pet TYPE varchar(1000);
+ALTER TABLE shelters ALTER COLUMN safety TYPE varchar(1000);
+ALTER TABLE shelters ALTER COLUMN home_recommendations_young TYPE varchar(1000);
+ALTER TABLE shelters ALTER COLUMN home_recommendations_old TYPE varchar(1000);
+ALTER TABLE shelters ALTER COLUMN transporting_recommendations TYPE varchar(1000);
+ALTER TABLE shelters ALTER COLUMN cynologist_recommendations TYPE varchar(4000);
 
 INSERT INTO shelters (id, volunteer_chat_id, shelter_type, meeting_recommendations, how_to_get_pet,
                       documents_list, general_info, phone_number, schedule, address, how_to_get,
                       security_and_pass, safety, transporting_recommendations, home_recommendations_young,
-                      home_recommendations_old, cynologist_recommendations,list_of_cynologists,disability_recommendations, why_we_can_deny)
-VALUES (0, 0, 'dogs',
+                      home_recommendations_old, cynologist_recommendations, why_we_can_deny)
+VALUES (0, '-1001755211667', 'dogs',
         'Важно, чтобы между вами и выбранным вами пушистым другом была связь.
         Вы должны убедиться, что новый член вашей семьи будет успешно адаптироваться к вашему образу жизни.
         Чтобы привести в дом подходящую собаку и убедиться, что ваш образ жизни идеален для вашего нового питомца, необходимы тщательные исследования и планирование.
@@ -181,16 +162,14 @@ VALUES (0, 0, 'dogs',
         8.Будьте разумны в требованиях. Не нужно требовать, чтобы собака делала то, что явно за гранью её возможностей. Чем больше будет таких требований, тем сильнее упадёт доверие.
         9.Не доверяйте собаке на 100%. Помните, что она — животное, насколько бы идеально выдрессированной она ни была, и вы не в состоянии предсказать абсолютно всё. Даже если пёс научен ходить у ноги и мгновенно выполнять команды, берите его на поводок у шоссе и в потенциально опасных местах. Вдруг она увидит знакомого человека и бросится под колёса? Нельзя быть уверенным, что этого не случится, а одна ошибка может стоить животному жизни.
         10.Самое страшное — потерять уважение. Непоследовательность, обманы, жестокость, необоснованные наказания, завышенные требования — всё это рано или поздно приведёт к тому, что собака окончательно потеряет к вам доверие. Этого допустить нельзя никак.',
-        'LIST OF CYNOLOGISTS PLACEHOLDER',
-        'DISABILITY RECO PLACEHOLDER',
         'Не достаточно финансов для содержания животного, нет времени на собаку');
 
--- changeset m_yatsushko:6
+-- changeset m_yatsushko:5
 INSERT INTO shelters (id, volunteer_chat_id, shelter_type, meeting_recommendations, how_to_get_pet,
                       documents_list, general_info, phone_number, schedule, address, how_to_get,
                       security_and_pass, safety, transporting_recommendations, home_recommendations_young,
-                      home_recommendations_old,disability_recommendations, why_we_can_deny)
-VALUES (1, 1, 'cats',
+                      home_recommendations_old, why_we_can_deny)
+VALUES (1, '-1001642704509', 'cats',
         'Важно, чтобы между вами и выбранным вами пушистым другом была связь.
         Вы должны убедиться, что новый член вашей семьи будет успешно адаптироваться к вашему образу жизни.
         Чтобы привести в дом подходящую кошку и убедиться, что ваш образ жизни идеален для вашего нового питомца, необходимы тщательные исследования и планирование.
@@ -219,6 +198,4 @@ VALUES (1, 1, 'cats',
         Это поможет ему проще адаптироваться к новому месту и режиму.
         Обеспечьте животному активную жизнь: предоставьте котику необходимые игрушки. Играйте вместе',
         'Корми кошку и не обижай, и подчиняйся',
-        'DISABILITY RECO PLACEHOLDER',
         'Не достаточно финансов для содержания животного, нет времени на кошку');
-

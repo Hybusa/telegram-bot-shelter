@@ -3,7 +3,7 @@
 -- changeset akuznetsov:1
 CREATE TABLE users
 (
-    id      INTEGER PRIMARY KEY,
+    id      SERIAL PRIMARY KEY,
     name    VARCHAR(255),
     chat_id bigint,
     contact VARCHAR(255),
@@ -12,7 +12,7 @@ CREATE TABLE users
 
 CREATE TABLE shelters
 (
-    id                           INTEGER PRIMARY KEY,
+    id                           SERIAL PRIMARY KEY,
     volunteer_chat_id            bigint,
     shelter_type                 VARCHAR(255),
     meeting_recommendations      VARCHAR(255),
@@ -35,7 +35,7 @@ CREATE TABLE shelters
 
 CREATE TABLE pets
 (
-    id                         INTEGER PRIMARY KEY,
+    id                         SERIAL PRIMARY KEY,
     name                       VARCHAR(255),
     age                        INTEGER,
     short_info                 VARCHAR(255),
@@ -50,7 +50,7 @@ CREATE TABLE pets
 
 CREATE TABLE adopted_cats
 (
-    id               INTEGER PRIMARY KEY,
+    id               SERIAL PRIMARY KEY,
     id_pet           INTEGER,
     id_user          INTEGER,
     period_start     timestamptz,
@@ -62,7 +62,7 @@ CREATE TABLE adopted_cats
 
 CREATE TABLE adopted_dogs
 (
-    id               INTEGER PRIMARY KEY,
+    id               SERIAL PRIMARY KEY,
     id_pet           INTEGER,
     id_user          INTEGER,
     period_start     timestamptz,
@@ -119,7 +119,7 @@ INSERT INTO shelters (id, volunteer_chat_id, shelter_type, meeting_recommendatio
                       documents_list, general_info, phone_number, schedule, address, how_to_get,
                       security_and_pass, safety, transporting_recommendations, home_recommendations_young,
                       home_recommendations_old, cynologist_recommendations, why_we_can_deny)
-VALUES (0, '0', 'dogs',
+VALUES (0, 0, 'dogs',
         'Важно, чтобы между вами и выбранным вами пушистым другом была связь.
         Вы должны убедиться, что новый член вашей семьи будет успешно адаптироваться к вашему образу жизни.
         Чтобы привести в дом подходящую собаку и убедиться, что ваш образ жизни идеален для вашего нового питомца, необходимы тщательные исследования и планирование.
@@ -169,7 +169,7 @@ INSERT INTO shelters (id, volunteer_chat_id, shelter_type, meeting_recommendatio
                       documents_list, general_info, phone_number, schedule, address, how_to_get,
                       security_and_pass, safety, transporting_recommendations, home_recommendations_young,
                       home_recommendations_old, why_we_can_deny)
-VALUES (1, '1', 'cats',
+VALUES (1, 1, 'cats',
         'Важно, чтобы между вами и выбранным вами пушистым другом была связь.
         Вы должны убедиться, что новый член вашей семьи будет успешно адаптироваться к вашему образу жизни.
         Чтобы привести в дом подходящую кошку и убедиться, что ваш образ жизни идеален для вашего нового питомца, необходимы тщательные исследования и планирование.

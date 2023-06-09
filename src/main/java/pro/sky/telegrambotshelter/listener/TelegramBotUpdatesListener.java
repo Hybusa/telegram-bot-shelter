@@ -11,7 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import pro.sky.telegrambotshelter.model.User;
 import pro.sky.telegrambotshelter.service.ShelterService;
+import pro.sky.telegrambotshelter.service.UserService;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
@@ -32,9 +34,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     private final ShelterService shelterService;
 
-    public TelegramBotUpdatesListener(TelegramBot telegramBot, ShelterService shelterService) {
+    private final UserService userService;
+
+    public TelegramBotUpdatesListener(TelegramBot telegramBot, ShelterService shelterService, UserService userService) {
         this.telegramBot = telegramBot;
         this.shelterService = shelterService;
+        this.userService = userService;
     }
 
     /**
@@ -43,6 +48,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     @PostConstruct
     public void init() {
         telegramBot.setUpdatesListener(this);
+        shelterChoice = userService.getMapUsersChatId();
     }
 
     /**
@@ -74,8 +80,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     telegramBot.execute(new SendMessage(chatId, "Welcome back, " + update.message().chat().firstName())
                             .replyMarkup(new ReplyKeyboardRemove())
                             .disableNotification(true));
-                else
+                else {
+                    userService.save(new User(update.message().chat().firstName(), chatId));
                     startBot(chatId, update.message().chat().firstName());
+                }
                 choiceMessage(chatId);
                 break;
             case "Get info about a shelter":
@@ -84,8 +92,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             case "How to get an animal form the shelter":
                 replyString = "Placeholder for 'How to get an animal form the shelter'";
                 break;
-            case "Get pet info":
-                replyString = "Placeholder for 'Get pet info'";
+            case "Send report":
+                replyString = "Placeholder for 'Send report'";
                 break;
             case "Call a volunteer":
                 replyString = "Placeholder for 'Call a volunteer'";
@@ -118,7 +126,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         sendMessage(chatId, messageString);
         Keyboard replyKeyboardMarkup = new ReplyKeyboardMarkup(
                 new String[]{"Get info about a shelter", "How to get an animal form the shelter"},
-                new String[]{"Get pet info", "Call a volunteer"})
+                new String[]{"Send report", "Call a volunteer"})
                 .resizeKeyboard(true)
                 .selective(true);
         telegramBot.execute(new SendMessage(chatId, "Please, choose an option from the menu")

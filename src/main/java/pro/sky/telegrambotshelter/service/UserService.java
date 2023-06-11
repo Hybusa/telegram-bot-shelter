@@ -38,8 +38,8 @@ public class UserService {
     /**
      * метод для получения контакта пользователя
      */
-    public Optional<User> getUserPhone(Long chatId) {
-        return userRepository.findUserByChatId(chatId).get;
+    public String getUserPhone(Long chatId) {
+        return userRepository.findUserByChatId(chatId).;
     }
 
     /**

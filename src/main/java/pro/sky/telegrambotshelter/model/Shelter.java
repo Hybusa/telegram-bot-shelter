@@ -28,7 +28,7 @@ public class Shelter {
 
     private String schedule;
 
-    private String getHowToGet;
+    private String howToGet;
 
     private String address;
 
@@ -59,7 +59,7 @@ public class Shelter {
                    String phoneNumber,
                    String schedule,
                    String address,
-                   String getHowToGet,
+                   String howToGet,
                    String securityAndPass,
                    String safety,
                    String transportingRecommendations,
@@ -76,7 +76,7 @@ public class Shelter {
         this.phoneNumber = phoneNumber;
         this.schedule = schedule;
         this.address = address;
-        this.getHowToGet = getHowToGet;
+        this.howToGet = howToGet;
         this.securityAndPass = securityAndPass;
         this.safety = safety;
         this.transportingRecommendations = transportingRecommendations;
@@ -167,11 +167,11 @@ public class Shelter {
     }
 
     public String getGetHowToGet() {
-        return getHowToGet;
+        return howToGet;
     }
 
     public void setGetHowToGet(String getHowToGet) {
-        this.getHowToGet = getHowToGet;
+        this.howToGet = getHowToGet;
     }
 
     public String getSecurityAndPass() {
@@ -244,7 +244,7 @@ public class Shelter {
                 && Objects.equals(phoneNumber, shelter.phoneNumber)
                 && Objects.equals(schedule, shelter.schedule)
                 && Objects.equals(address, shelter.address)
-                && Objects.equals(getHowToGet, shelter.getHowToGet)
+                && Objects.equals(howToGet, shelter.howToGet)
                 && Objects.equals(securityAndPass, shelter.securityAndPass)
                 && Objects.equals(safety, shelter.safety)
                 && Objects.equals(transportingRecommendations, shelter.transportingRecommendations)
@@ -265,7 +265,7 @@ public class Shelter {
                 phoneNumber,
                 schedule,
                 address,
-                getHowToGet,
+                howToGet,
                 securityAndPass,
                 safety,
                 transportingRecommendations,

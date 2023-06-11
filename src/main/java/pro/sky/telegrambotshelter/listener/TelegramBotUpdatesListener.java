@@ -51,7 +51,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      */
     @PostConstruct
     public void init() {
-        shelterChoice = userService.getMapUsersChatId();
+        shelterChoice = userService.getMapUsersChatIdWithChoice();
         telegramBot.setUpdatesListener(this);
     }
 
@@ -116,7 +116,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 replyString = "Hello, "
                         + userName
                         + "\nWhat would you like to know about a shelter.\n"
-                        + shelterService.getGeneralInfo("cats");
+                        + shelterService.getGeneralInfo(shelterChoice.get(chatId));
                 InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(new InlineKeyboardButton[][]
                         {
                                 new InlineKeyboardButton[]{
@@ -167,13 +167,17 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         switch (update.callbackQuery().data()) {
             case "st0_cat_shelters":
                 shelterChoice.put(chatId, "cats");
-                // UPDATING IN THE DATABASE
+                userService.updateShelterChoiceByChatId(
+                        new User(update.callbackQuery().from().firstName(),chatId),"cats"
+                );
                 messageString = "You have selected Cat shelters.";
                 break;
             case "st0_dog_shelters":
                 shelterChoice.put(chatId, "dogs");
+                userService.updateShelterChoiceByChatId(
+                        new User(update.callbackQuery().from().firstName(),chatId),"dogs"
+                );
                 messageString = "You have selected Dog shelters.";
-                // UPDATING IN THE DATABASE
                 break;
             default:
                 messageString = "smth went wrong";
@@ -200,6 +204,9 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         switch (update.callbackQuery().data()) {
             case "st1_shelter_info":
                 messageString = shelterService.getGeneralInfo(shelterChoiceString);
+                break;
+            case "st1_shelter_schedule":
+                messageString = shelterService.getSchedule(shelterChoiceString);
                 break;
             case "st1_shelter_address":
                 messageString = shelterService.getAddress(shelterChoiceString);

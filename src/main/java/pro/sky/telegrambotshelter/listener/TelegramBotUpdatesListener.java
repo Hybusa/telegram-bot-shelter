@@ -2,12 +2,12 @@ package pro.sky.telegrambotshelter.listener;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
+import com.pengrad.telegrambot.model.BotCommand;
 import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.botcommandscope.BotCommandScopeDefault;
 import com.pengrad.telegrambot.model.request.*;
-import com.pengrad.telegrambot.request.DeleteMessage;
-import com.pengrad.telegrambot.request.EditMessageText;
-import com.pengrad.telegrambot.request.SendContact;
-import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.request.*;
+import com.pengrad.telegrambot.response.BaseResponse;
 import com.pengrad.telegrambot.response.SendResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +27,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     @Value("${telegram.bot.info}")
     private String botInfo;
+
+    final Keyboard STANDARD_KEYBOARD_MARKUP = new ReplyKeyboardMarkup(
+            new String[]{"Get info about a shelter", "How to get an animal form the shelter"},
+            new String[]{"Send report", "Call a volunteer"})
+            .resizeKeyboard(true)
+            .selective(true);
 
     Map<Long, String> shelterChoice = new HashMap<>();
 
@@ -71,11 +77,21 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 else if (update.callbackQuery().data().startsWith("st3"))
                     stage3ChoiceUpdateParser(update);
 
+            } else if(update.message().contact()!=null) {
+                contactReceiving(update);
             } else {
                 messageParser(update);
             }
         });
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
+    }
+
+    private void contactReceiving(Update update) {
+        //Saving contact data to the DBs
+
+        telegramBot.execute(new SendMessage(update.message().from().id(), "Thank you. Our volunteer will contact you!")
+                .replyMarkup(STANDARD_KEYBOARD_MARKUP));
+
     }
 
     private void stage3ChoiceUpdateParser(Update update) {
@@ -105,14 +121,21 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     userService.save(new User(userName, chatId));
                     startBot(chatId, userName);
                 }
-                choiceMessage(chatId,
+                BotCommand[] commandsArr = new BotCommand[]{
+                        new BotCommand("/start", "Restart the bot"),
+                };
+                SetMyCommands commands = new SetMyCommands(commandsArr);
+                commands.scope(new BotCommandScopeDefault());
+                BaseResponse response = telegramBot.execute(commands); // NEEDS CHECKING
+
+                choiceMessage(
+                        chatId,
                         "Please choose a type of shelter you're looking for",
-                        new InlineKeyboardMarkup(new InlineKeyboardButton[]{
-                                new InlineKeyboardButton("Cat").callbackData("st0_cat_shelters"),
-                                new InlineKeyboardButton("Dog").callbackData("st0_dog_shelters")}));
+                        new InlineKeyboardMarkup(new InlineKeyboardButton("Cat").callbackData("st0_cat_shelters"),
+                                new InlineKeyboardButton("Dog").callbackData("st0_dog_shelters"))
+                );
                 break;
             case "Get info about a shelter":
-
                 replyString = "Hello, "
                         + userName
                         + "\nWhat would you like to know about a shelter.\n"
@@ -148,9 +171,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 sendMessage(chatId, replyString);
                 break;
             case "Call a volunteer":
-                SendResponse contact = telegramBot.execute(new SendContact(chatId, VOLUNTEER_PHONE_NUMBER, VOLUNTEER_NAME).vcard("Волонтёр приюта Александр")
-                        .allowSendingWithoutReply(true));
-                break;
+                SendContact sendContact = new SendContact(chatId, VOLUNTEER_PHONE_NUMBER, VOLUNTEER_NAME).vcard("Волонтёр приюта Александр")
+                        .allowSendingWithoutReply(true);
+                telegramBot.execute(sendContact);
+
             default:
                 replyString = "Sorry, something went wrong try again.";
                 sendMessage(chatId, replyString);
@@ -184,13 +208,9 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         }
         telegramBot.execute(new DeleteMessage(chatId, update.callbackQuery().message().messageId()));
         sendMessage(chatId, messageString);
-        Keyboard replyKeyboardMarkup = new ReplyKeyboardMarkup(
-                new String[]{"Get info about a shelter", "How to get an animal form the shelter"},
-                new String[]{"Send report", "Call a volunteer"})
-                .resizeKeyboard(true)
-                .selective(true);
+
         telegramBot.execute(new SendMessage(chatId, "Please, choose an option from the menu")
-                .replyMarkup(replyKeyboardMarkup));
+                .replyMarkup(STANDARD_KEYBOARD_MARKUP));
     }
 
     /**
@@ -221,14 +241,18 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 messageString = shelterService.getSafety(shelterChoiceString);
                 break;
             case "st1_call_a_volunteer":
-                SendResponse contact = telegramBot.execute(new SendContact(chatId, VOLUNTEER_PHONE_NUMBER, VOLUNTEER_NAME).vcard("Волонтёр приюта Александр")
+                SendResponse contact = telegramBot.execute(new SendContact(chatId, VOLUNTEER_PHONE_NUMBER, VOLUNTEER_NAME)
                         .allowSendingWithoutReply(true));
+                break;
+            case "st1_contact_receiving":
+                SendResponse response = telegramBot.execute(new SendMessage(chatId, "Click the button to send contact info.")
+                        .replyMarkup(new ReplyKeyboardMarkup(
+                                new KeyboardButton("Send contact").requestContact(true))));
                 break;
             default:
                 messageString = "smth went wrong";
         }
         telegramBot.execute(new EditMessageText(chatId, messageId,messageString).replyMarkup(update.callbackQuery().message().replyMarkup()));
-        //sendMessage(chatId, messageString);
     }
 
     /**

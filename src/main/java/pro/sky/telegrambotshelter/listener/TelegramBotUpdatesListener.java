@@ -167,11 +167,13 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         switch (update.callbackQuery().data()) {
             case "st0_cat_shelters":
                 shelterChoice.put(chatId, "cats");
+                // UPDATING IN THE DATABASE
                 messageString = "You have selected Cat shelters.";
                 break;
             case "st0_dog_shelters":
                 shelterChoice.put(chatId, "dogs");
                 messageString = "You have selected Dog shelters.";
+                // UPDATING IN THE DATABASE
                 break;
             default:
                 messageString = "smth went wrong";
@@ -193,8 +195,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private void stage1ChoiceUpdateParser(Update update) {
         Long chatId = update.callbackQuery().from().id();
         Integer messageId = update.callbackQuery().message().messageId();
-        String shelterChoiceString = "cats";
-        String messageString;
+        String shelterChoiceString = shelterChoice.get(chatId);
+        String messageString= "Shelter Menu";
         switch (update.callbackQuery().data()) {
             case "st1_shelter_info":
                 messageString = shelterService.getGeneralInfo(shelterChoiceString);
@@ -212,12 +214,13 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 messageString = shelterService.getSafety(shelterChoiceString);
                 break;
             case "st1_call_a_volunteer":
-                messageString = "Call a volunteer placeholder!";
+                SendResponse contact = telegramBot.execute(new SendContact(chatId, VOLUNTEER_PHONE_NUMBER, VOLUNTEER_NAME).vcard("Волонтёр приюта Александр")
+                        .allowSendingWithoutReply(true));
                 break;
             default:
                 messageString = "smth went wrong";
         }
-        telegramBot.execute(new EditMessageText(chatId, messageId,"messageString").replyMarkup(update.callbackQuery().message().replyMarkup()));
+        telegramBot.execute(new EditMessageText(chatId, messageId,messageString).replyMarkup(update.callbackQuery().message().replyMarkup()));
         //sendMessage(chatId, messageString);
     }
 

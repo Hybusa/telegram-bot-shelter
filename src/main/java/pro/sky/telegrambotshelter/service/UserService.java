@@ -28,7 +28,7 @@ public class UserService {
     /**
      * метод для изменения пользователя в БД
      */
-    public void updateShelterChoiceByChatId(User user, String shelterTypeChoice){
+    public void updateShelterChoiceByChatId(User user, String shelterTypeChoice) {
         Optional<User> optUser = userRepository.findUserByChatId(user.getChatId());
         User tmpUser;
         tmpUser = optUser.orElse(user);
@@ -39,11 +39,13 @@ public class UserService {
     /**
      * метод для получения мапы с chat_id пользователей
      */
-    public Map<Long, String> getMapUsersChatId() {
+    public Map<Long, String> getMapUsersChatIdWithChoice() {
         Map<Long, String> usersId = new HashMap<>();
         List<User> users = userRepository.findAll();
         for (User user : users) {
-            usersId.put(user.getId(), user.getShelterTypeChoice());
+            String shelterTypeChoice = user.getShelterTypeChoice();
+            if (shelterTypeChoice != null)
+                usersId.put(user.getChatId(), user.getShelterTypeChoice());
         }
         return usersId;
     }
@@ -79,7 +81,11 @@ public class UserService {
 
         for (Long l : usersId) {
             Optional<User> optUser = getUserById(l);
-            optUser.ifPresent(user -> contactsFromCats.add(user.getContact()));
+            if (optUser.isPresent()) {
+                String contact = optUser.get().getContact();
+                if (contact != null)
+                    contactsFromCats.add(contact);
+            }
         }
         return contactsFromCats;
     }

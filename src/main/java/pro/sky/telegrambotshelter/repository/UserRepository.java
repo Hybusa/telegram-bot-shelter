@@ -21,10 +21,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<Long> listChatIdUsers();
 
 
-    /**метод для поиска пользователя по id*/
-    User findUserById(Long id);
-
-
     /**список id пользователей приюта для собак*/
     @Query(value = "SELECT DISTINCT user_id FROM user_shelter_join WHERE shelter_id = 0", nativeQuery = true)
     List<Long> listUsersIdFromDogsShelter();

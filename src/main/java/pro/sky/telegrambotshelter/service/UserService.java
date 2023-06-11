@@ -35,9 +35,9 @@ public class UserService {
     /**метод для получения мапы с chat_id пользователей*/
     public Map<Long, String> getMapUsersChatId() {
         Map<Long, String> usersId = new HashMap<>();
-        List<Long> usId = userRepository.listChatIdUsers();
-        for (Long ignored : usId) {
-            usersId.put(ignored, null);
+        List<User> users = userRepository.findAll();
+        for (User user : users) {
+            usersId.put(user.getId(), user.getShelterTypeChoice());
         }
         return usersId;
     }

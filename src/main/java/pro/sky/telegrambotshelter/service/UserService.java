@@ -1,5 +1,6 @@
 package pro.sky.telegrambotshelter.service;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pro.sky.telegrambotshelter.model.User;
 import pro.sky.telegrambotshelter.repository.UserRepository;
@@ -36,13 +37,6 @@ public class UserService {
     }
 
     /**
-     * метод для получения контакта пользователя
-     */
-    public String getUserPhone(Long chatId) {
-        return userRepository.findUserByChatId(chatId).;
-    }
-
-    /**
      * метод для получения мапы с chat_id пользователей
      */
     public Map<Long, String> getMapUsersChatId() {
@@ -58,25 +52,16 @@ public class UserService {
      * метод для получения пользователя по id
      */
     public Optional<User> getUserById(Long id) {
-        return userRepository.findUserById(id);
+        return userRepository.findById(id);
     }
 
     /**
      * метод для получения list с контактами пользователей приюта для собак
      */
-    public Optional<List<String>> getListUsersContactsWithDodShelter() {
+    public List<String> getListUsersContactsWithDodShelter() {
         List<Long> usersId = new ArrayList<>(userRepository.listUsersIdFromDogsShelter());
-        List<String> contactsFromDods = new ArrayList<>();
-        String contact;
 
-        for (Long l : usersId) {
-            contact = getUserById(l).getContact();
-            if (contact != null) {
-                contactsFromDods.add(getUserById(l).getContact());
-            }
-        }
-
-        return contactsFromDods;
+        return getContacts(usersId);
     }
 
     /**
@@ -84,16 +69,18 @@ public class UserService {
      */
     public List<String> getListUsersContactsWithCatShelter() {
         List<Long> usersId = new ArrayList<>(userRepository.listUsersIdFromCatsShelter());
+
+        return getContacts(usersId);
+    }
+
+    @NotNull
+    private List<String> getContacts(List<Long> usersId) {
         List<String> contactsFromCats = new ArrayList<>();
-        String contact;
 
         for (Long l : usersId) {
-            contact = getUserById(l).getContact();
-            if (contact != null) {
-                contactsFromCats.add(getUserById(l).getContact());
-            }
+            Optional<User> optUser = getUserById(l);
+            optUser.ifPresent(user -> contactsFromCats.add(user.getContact()));
         }
-
         return contactsFromCats;
     }
 

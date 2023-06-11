@@ -5,6 +5,8 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.*;
 import com.pengrad.telegrambot.request.DeleteMessage;
+import com.pengrad.telegrambot.request.EditMessageText;
+import com.pengrad.telegrambot.request.SendContact;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import org.slf4j.Logger;
@@ -36,6 +38,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     private final UserService userService;
 
+    private final String VOLUNTEER_NAME = "VOLONTEER_PLACEHOLDER";
+    private final String VOLUNTEER_PHONE_NUMBER = "+00000000000";
     public TelegramBotUpdatesListener(TelegramBot telegramBot, ShelterService shelterService, UserService userService) {
         this.telegramBot = telegramBot;
         this.shelterService = shelterService;
@@ -47,8 +51,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      */
     @PostConstruct
     public void init() {
+        shelterChoice = userService.getMapUsersChatIdWithChoice();
         telegramBot.setUpdatesListener(this);
-        shelterChoice = userService.getMapUsersChatId();
     }
 
     /**
@@ -58,13 +62,29 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     public int process(List<Update> updates) {
         updates.forEach(update -> {
             if (update.callbackQuery() != null) {
-                shelterChoiceUpdateParser(update);
+                if (update.callbackQuery().data().startsWith("st0"))
+                    shelterChoiceUpdateParser(update);
+                else if (update.callbackQuery().data().startsWith("st1"))
+                    stage1ChoiceUpdateParser(update);
+                else if (update.callbackQuery().data().startsWith("st2"))
+                    stage2ChoiceUpdateParser(update);
+                else if (update.callbackQuery().data().startsWith("st3"))
+                    stage3ChoiceUpdateParser(update);
+
             } else {
                 messageParser(update);
             }
         });
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
+
+    private void stage3ChoiceUpdateParser(Update update) {
+    }
+
+    private void stage2ChoiceUpdateParser(Update update) {
+
+    }
+
 
     /**
      * ОБработка вхдящего сообщения
@@ -73,35 +93,69 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         logger.info("Processing update: {}", update);
         long chatId = update.message().chat().id();
         String messageText = update.message().text();
-        String replyString = null;
+        String userName = update.message().chat().firstName();
+        String replyString;
         switch (messageText) {
             case "/start":
                 if (shelterChoice.containsKey(chatId))
-                    telegramBot.execute(new SendMessage(chatId, "Welcome back, " + update.message().chat().firstName())
+                    telegramBot.execute(new SendMessage(chatId, "Welcome back, " + userName)
                             .replyMarkup(new ReplyKeyboardRemove())
                             .disableNotification(true));
                 else {
-                    userService.save(new User(update.message().chat().firstName(), chatId));
-                    startBot(chatId, update.message().chat().firstName());
+                    userService.save(new User(userName, chatId));
+                    startBot(chatId, userName);
                 }
-                choiceMessage(chatId);
+                choiceMessage(chatId,
+                        "Please choose a type of shelter you're looking for",
+                        new InlineKeyboardMarkup(new InlineKeyboardButton[]{
+                                new InlineKeyboardButton("Cat").callbackData("st0_cat_shelters"),
+                                new InlineKeyboardButton("Dog").callbackData("st0_dog_shelters")}));
                 break;
             case "Get info about a shelter":
-                replyString = shelterService.getGeneralInfo(shelterChoice.get(chatId));
+
+                replyString = "Hello, "
+                        + userName
+                        + "\nWhat would you like to know about a shelter.\n"
+                        + shelterService.getGeneralInfo(shelterChoice.get(chatId));
+                InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(new InlineKeyboardButton[][]
+                        {
+                                new InlineKeyboardButton[]{
+                                        new InlineKeyboardButton("Info about the shelter").callbackData("st1_shelter_info")},
+                                new InlineKeyboardButton[]{
+                                        new InlineKeyboardButton("Shelter schedule").callbackData("st1_shelter_schedule")},
+                                new InlineKeyboardButton[]{
+                                        new InlineKeyboardButton("Shelter address").callbackData("st1_shelter_address")},
+                                new InlineKeyboardButton[]{
+                                        new InlineKeyboardButton("How to get to the shelter").callbackData("st1_shelter_path")},
+                                new InlineKeyboardButton[]{
+                                        new InlineKeyboardButton("Security contacts to get a pass").callbackData("st1_shelter_security_pass")},
+                                new InlineKeyboardButton[]{
+                                        new InlineKeyboardButton("Shelter safety requirements").callbackData("st1_shelter_safety_requirements")},
+                                new InlineKeyboardButton[]{
+                                        new InlineKeyboardButton("Call a volunteer").callbackData("st1_call_a_volunteer")},
+                                new InlineKeyboardButton[]{
+                                        new InlineKeyboardButton("Send my contact").callbackData("st1_contact_receiving")}
+                        });
+
+                choiceMessage(chatId, replyString, inlineKeyboardMarkup);
                 break;
             case "How to get an animal form the shelter":
                 replyString = "Placeholder for 'How to get an animal form the shelter'";
+                sendMessage(chatId, replyString);
                 break;
             case "Send report":
                 replyString = "Placeholder for 'Send report'";
+                sendMessage(chatId, replyString);
                 break;
             case "Call a volunteer":
-                replyString = "Placeholder for 'Call a volunteer'";
+                SendResponse contact = telegramBot.execute(new SendContact(chatId, VOLUNTEER_PHONE_NUMBER, VOLUNTEER_NAME).vcard("Волонтёр приюта Александр")
+                        .allowSendingWithoutReply(true));
                 break;
             default:
                 replyString = "Sorry, something went wrong try again.";
+                sendMessage(chatId, replyString);
         }
-        sendMessage(chatId, replyString);
+
     }
 
     /**
@@ -111,12 +165,18 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         Long chatId = update.callbackQuery().from().id();
         String messageString;
         switch (update.callbackQuery().data()) {
-            case "cat_shelters":
+            case "st0_cat_shelters":
                 shelterChoice.put(chatId, "cats");
+                userService.updateShelterChoiceByChatId(
+                        new User(update.callbackQuery().from().firstName(),chatId),"cats"
+                );
                 messageString = "You have selected Cat shelters.";
                 break;
-            case "dog_shelters":
+            case "st0_dog_shelters":
                 shelterChoice.put(chatId, "dogs");
+                userService.updateShelterChoiceByChatId(
+                        new User(update.callbackQuery().from().firstName(),chatId),"dogs"
+                );
                 messageString = "You have selected Dog shelters.";
                 break;
             default:
@@ -134,15 +194,49 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     }
 
     /**
+     * Stage1 choice message parser
+     */
+    private void stage1ChoiceUpdateParser(Update update) {
+        Long chatId = update.callbackQuery().from().id();
+        Integer messageId = update.callbackQuery().message().messageId();
+        String shelterChoiceString = shelterChoice.get(chatId);
+        String messageString= "Shelter Menu";
+        switch (update.callbackQuery().data()) {
+            case "st1_shelter_info":
+                messageString = shelterService.getGeneralInfo(shelterChoiceString);
+                break;
+            case "st1_shelter_schedule":
+                messageString = shelterService.getSchedule(shelterChoiceString);
+                break;
+            case "st1_shelter_address":
+                messageString = shelterService.getAddress(shelterChoiceString);
+                break;
+            case "st1_shelter_path":
+                messageString = shelterService.getHowToGet(shelterChoiceString);
+                break;
+            case "st1_shelter_security_pass":
+                messageString = shelterService.getSecurityAndPass(shelterChoiceString);
+                break;
+            case "st1_shelter_safety_requirements":
+                messageString = shelterService.getSafety(shelterChoiceString);
+                break;
+            case "st1_call_a_volunteer":
+                SendResponse contact = telegramBot.execute(new SendContact(chatId, VOLUNTEER_PHONE_NUMBER, VOLUNTEER_NAME).vcard("Волонтёр приюта Александр")
+                        .allowSendingWithoutReply(true));
+                break;
+            default:
+                messageString = "smth went wrong";
+        }
+        telegramBot.execute(new EditMessageText(chatId, messageId,messageString).replyMarkup(update.callbackQuery().message().replyMarkup()));
+        //sendMessage(chatId, messageString);
+    }
+
+    /**
      * Создание сообщения с кнопками по выбору типа приюта
      */
-    private void choiceMessage(long chatId) {
-
-
-        SendResponse response = telegramBot.execute(new SendMessage(chatId, "Please choose a type of shelter you're looking for")
-                .replyMarkup(new InlineKeyboardMarkup(new InlineKeyboardButton[]{
-                        new InlineKeyboardButton("Cat").callbackData("cat_shelters")
-                        , new InlineKeyboardButton("Dog").callbackData("dog_shelters")})));
+    private void choiceMessage(long chatId, String message, InlineKeyboardMarkup inlineKeyboardMarkups) {
+        SendResponse response = telegramBot.execute(new SendMessage(chatId, message)
+                .replyMarkup(inlineKeyboardMarkups));
     }
 
     /**

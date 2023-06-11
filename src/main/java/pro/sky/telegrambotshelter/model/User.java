@@ -18,6 +18,8 @@ public class User {
 
     private boolean failed;
 
+    private String shelterTypeChoice;
+
 
     public User() {
     }
@@ -47,6 +49,10 @@ public class User {
         return chatId;
     }
 
+    public String getShelterTypeChoice() {
+        return shelterTypeChoice;
+    }
+
     public void setChatId(Long chatId) {
         this.chatId = chatId;
     }
@@ -65,6 +71,10 @@ public class User {
 
     public void setFailed(boolean failed) {
         this.failed = failed;
+    }
+
+    public void setShelterTypeChoice(String shelterTypeChoice) {
+        this.shelterTypeChoice = shelterTypeChoice;
     }
 
     @Override

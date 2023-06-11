@@ -7,6 +7,7 @@ CREATE TABLE users
     name    VARCHAR(255),
     chat_id bigint,
     contact VARCHAR(255),
+    shelter_type_choice VARCHAR(255),
     failed  BOOLEAN
 );
 

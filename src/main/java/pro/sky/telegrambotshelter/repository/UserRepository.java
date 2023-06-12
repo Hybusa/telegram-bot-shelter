@@ -29,4 +29,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     /**список id пользователей приюта для кошек*/
     @Query(value = "SELECT DISTINCT user_id FROM user_shelter_join WHERE shelter_id = 1", nativeQuery = true)
     List<Long> listUsersIdFromCatsShelter();
+
+    List<User> findUserByShelterTypeChoice(String shelterType);
 }

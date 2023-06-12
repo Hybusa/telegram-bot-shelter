@@ -91,4 +91,10 @@ public class ShelterService {
     public String getWhyWeCanDeny(String shelterType) {
         return shelterRepository.findShelterByShelterType(shelterType).getWhyWeCanDeny();
     }
+
+    /**метод для получения Id приюта*/
+    public Long getShelterId(String shelterType) {
+        return shelterRepository.findShelterByShelterType(shelterType).getId();
+    }
+
 }

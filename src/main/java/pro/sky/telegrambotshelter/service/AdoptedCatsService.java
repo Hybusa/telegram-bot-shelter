@@ -1,14 +1,9 @@
 package pro.sky.telegrambotshelter.service;
 
+import liquibase.pro.packaged.A;
 import org.springframework.stereotype.Service;
 import pro.sky.telegrambotshelter.model.AdoptedCats;
 import pro.sky.telegrambotshelter.repository.AdoptedCatsRepository;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class AdoptedCatsService {
@@ -19,65 +14,22 @@ public class AdoptedCatsService {
         this.adoptedCatsRepository = adoptedCatsRepository;
     }
 
-    /**
-     * сохранение сущности AdoptedCats в БД
-     */
     public void save(AdoptedCats adoptedCats) {
         adoptedCatsRepository.save(adoptedCats);
     }
 
-    /**
-     * редактирование сущности AdoptedCats в БД
-     */
-    public void update(AdoptedCats adoptedCats) {
-        adoptedCatsRepository.save(adoptedCats);
+    public AdoptedCats findById(Long id) {
+        return adoptedCatsRepository.findById(id).get();
     }
 
-    /**
-     * редактирование последней даты очета AdoptedCats
-     */
-    public void updateLastReports(Long idUser, LocalDateTime localDateTime) {
-
-        Optional<AdoptedCats> adoptedCats = adoptedCatsRepository.findByIdUser(idUser);
-
-        adoptedCats.ifPresent(entity -> {
-
-            entity.setLastReportDate(localDateTime);
-            update(entity);
-
-        });
-
+    public AdoptedCats findLastAdoptedCats() {
+        return adoptedCatsRepository.findFirstByIdPetIsNull().get();
     }
 
-    /**
-     * удаление сущности AdoptedCats из БД
-     */
-    public void delete(AdoptedCats adoptedCats) {
-        adoptedCatsRepository.delete(adoptedCats);
-    }
+    public AdoptedCats findByIdPet(Long idPet) { return adoptedCatsRepository.findByIdPet(idPet); }
 
-    /**
-     * поиск всех записей adopted_cats
-     */
-    public List<AdoptedCats> getAll() {
-        return adoptedCatsRepository.findAll();
-    }
+    public AdoptedCats findByIdUser(Long idUser) { return adoptedCatsRepository.findByIdUser(idUser); }
 
-    /**
-     * получение всех AdoptedCats в мапу (Id пользователя - AdoptedCat)
-     */
-    public Map<Long, AdoptedCats> getAllAdoptedCatsToMap() {
-
-        List<AdoptedCats> adoptedCatsList = adoptedCatsRepository.findAll();
-        Map<Long, AdoptedCats> adoptedCatsMap = new HashMap<>();
-
-        for (AdoptedCats adoptedCat : adoptedCatsList) {
-            adoptedCatsMap.put(adoptedCat.getIdUser(), adoptedCat);
-        }
-
-        return adoptedCatsMap;
-
-    }
-
+    public void deleteAdoptedCats(AdoptedCats adoptedCats) {adoptedCatsRepository.delete(adoptedCats);}
 
 }

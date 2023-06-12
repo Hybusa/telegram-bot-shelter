@@ -10,4 +10,5 @@ public interface ShelterRepository extends JpaRepository<Shelter, Long> {
 
     /**метод для поиска приюта по типу*/
     Shelter findShelterByShelterType(String shelterType);
+
 }

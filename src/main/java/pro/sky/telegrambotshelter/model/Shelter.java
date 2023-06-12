@@ -44,6 +44,10 @@ public class Shelter {
 
     private String cynologistRecommendations;
 
+    private String listOfCynologists;
+
+    private String disabilityRecommendations;
+
     private String whyWeCanDeny;
 
 
@@ -66,6 +70,8 @@ public class Shelter {
                    String homeRecommendationsYoung,
                    String homeRecommendationsOld,
                    String cynologistRecommendations,
+                   String listOfCynologists,
+                   String disabilityRecommendations,
                    String whyWeCanDeny) {
         this.volunteerChatId = volunteerChatId;
         this.shelterType = shelterType;
@@ -83,6 +89,8 @@ public class Shelter {
         this.homeRecommendationsYoung = homeRecommendationsYoung;
         this.homeRecommendationsOld = homeRecommendationsOld;
         this.cynologistRecommendations = cynologistRecommendations;
+        this.listOfCynologists = listOfCynologists;
+        this.disabilityRecommendations =  disabilityRecommendations;
         this.whyWeCanDeny = whyWeCanDeny;
     }
 
@@ -222,6 +230,22 @@ public class Shelter {
         this.cynologistRecommendations = cynologistRecommendations;
     }
 
+    public String getListOfCynologists() {
+        return listOfCynologists;
+    }
+
+    public void setListOfCynologists(String listOfCynologists) {
+        this.listOfCynologists = listOfCynologists;
+    }
+
+    public String getDisabilityRecommendations() {
+        return disabilityRecommendations;
+    }
+
+    public void setDisabilityRecommendations(String disabilityRecommendations) {
+        this.disabilityRecommendations = disabilityRecommendations;
+    }
+
     public String getWhyWeCanDeny() {
         return whyWeCanDeny;
     }
@@ -251,6 +275,8 @@ public class Shelter {
                 && Objects.equals(homeRecommendationsYoung, shelter.homeRecommendationsYoung)
                 && Objects.equals(homeRecommendationsOld, shelter.homeRecommendationsOld)
                 && Objects.equals(cynologistRecommendations, shelter.cynologistRecommendations)
+                && Objects.equals(listOfCynologists, shelter.listOfCynologists)
+                && Objects.equals(disabilityRecommendations, shelter.disabilityRecommendations)
                 && Objects.equals(whyWeCanDeny, shelter.whyWeCanDeny);
     }
 
@@ -272,6 +298,8 @@ public class Shelter {
                 homeRecommendationsYoung,
                 homeRecommendationsOld,
                 cynologistRecommendations,
+                listOfCynologists,
+                disabilityRecommendations,
                 whyWeCanDeny);
     }
 }

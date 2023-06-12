@@ -89,5 +89,9 @@ public class UserService {
         }
         return contactsFromCats;
     }
+    /** поиск всех пользователей по типу приюта*/
+    public Collection<User> getUserByShelterType(String shelterType) {
+        return userRepository.findUserByShelterTypeChoice(shelterType);
+    }
 
 }

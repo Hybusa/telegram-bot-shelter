@@ -7,24 +7,21 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "contacts_For_Dogs_Shelter")
-public class ContactsForDogsShelter implements ContactForShelter {
+public class ContactsForDogsShelter {
 
     @Id
-    private Long user_id;
+    Long user_id;
     private String name;
     private String contact;
 
-    public ContactsForDogsShelter() {
-    }
+    public ContactsForDogsShelter(){}
 
-    public ContactsForDogsShelter(Long user_id, String name, String contact) {
-        this.user_id = user_id;
-        this.name = name;
-        this.contact = contact;
-    }
-
-    public Long getUser_Id() {
+    public Long getUser_id() {
         return user_id;
+    }
+
+    public void setUser_id(Long user_id) {
+        this.user_id = user_id;
     }
 
     public String getName() {
@@ -58,8 +55,10 @@ public class ContactsForDogsShelter implements ContactForShelter {
 
     @Override
     public String toString() {
-        return "name=" + name +
-                ", contact=" + contact + " \n";
+        return "ContactsForDogsShelter{" +
+                "user_id=" + user_id +
+                ", name='" + name + '\'' +
+                ", contact='" + contact + '\'' +
+                '}';
     }
-
 }

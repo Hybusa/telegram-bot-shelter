@@ -1,8 +1,8 @@
 package pro.sky.telegrambotshelter.service;
 
+import org.hibernate.query.Query;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-import org.webjars.NotFoundException;
 import pro.sky.telegrambotshelter.model.User;
 import pro.sky.telegrambotshelter.repository.UserRepository;
 
@@ -27,7 +27,7 @@ public class UserService {
     }
 
     /**
-     * метод для изменения выбора пользователя в БД
+     * метод для изменения типа приюта пользователя в БД
      */
     public void updateShelterChoiceByChatId(User user, String shelterTypeChoice) {
         Optional<User> optUser = userRepository.findUserByChatId(user.getChatId());
@@ -38,44 +38,14 @@ public class UserService {
     }
 
     /**
-     * метод для создания пользователя
+     * метод для добавления контактов пользователя в БД
      */
-    public User createUser(User user) {
-        return userRepository.save(user);
-    }
-
-
-    /**
-     * метод для обновления пользователя
-     */
-    public Optional<User> updateUser(User user) {
-        if (userRepository.existsById(user.getId()))
-            return Optional.of(userRepository.save(user));
-        return Optional.empty();
-    }
-
-    /**
-     * метод для получения всех пользователей
-     */
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    /**
-     * метод для получения всех пользователей по типу приюта
-     */
-    public List<User> getAllUsersByShelterTypeChoice(String choice) {
-        return userRepository.findAllByShelterTypeChoice(choice);
-    }
-
-
-    /**
-     * метод удаления Пользователя по id
-     */
-    public void deleteUserById(Long id){
-        if(!userRepository.existsById(id))
-            throw new NotFoundException("Pet id not found");
-        userRepository.deleteById(id);
+    public void saveContactsByChatId(User user, String contact) {
+        Optional<User> optUser = userRepository.findUserByChatId(user.getChatId());
+        User tmpUser;
+        tmpUser = optUser.orElse(user);
+        tmpUser.setContact(contact);
+        userRepository.save(tmpUser);
     }
 
     /**
@@ -92,12 +62,25 @@ public class UserService {
         return usersId;
     }
 
+    public Long getUserIdByChatId(Long chatId){
+       return userRepository.findUserByChatId(chatId).get().getId();
+    }
+
     /**
      * метод для получения пользователя по id
      */
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
     }
+
+
+    /**
+     * метод для получения типа приюта пользователя
+     */
+    public String getUsersShelterTypeChoice(Long chatId){
+        return userRepository.findUserByChatId(chatId).get().getShelterTypeChoice();
+    }
+
 
     /**
      * метод для получения list с контактами пользователей приюта для собак
@@ -106,6 +89,15 @@ public class UserService {
         List<Long> usersId = new ArrayList<>(userRepository.listUsersIdFromDogsShelter());
 
         return getContacts(usersId);
+    }
+
+
+    /**
+     * метод для получения контакта пользователя
+     */
+    public String getContact(Long chatId) {
+        Optional<User> optUser = userRepository.findUserByChatId(chatId);
+        return optUser.get().getContact();
     }
 
     /**
@@ -117,27 +109,19 @@ public class UserService {
         return getContacts(usersId);
     }
 
-    /**
-     * Метод удаления из таблицы users по chat_iD
-     */
-    public void deleteUsersByChatId(Long chatId) {
-        Optional<User> optUser = userRepository.findUserByChatId(chatId);
-        optUser.ifPresent(userRepository::delete);
-    }
-
     @NotNull
     private List<String> getContacts(List<Long> usersId) {
-        List<String> contactsFromCats = new ArrayList<>();
+        List<String> contacts = new ArrayList<>();
 
         for (Long l : usersId) {
             Optional<User> optUser = getUserById(l);
             if (optUser.isPresent()) {
                 String contact = optUser.get().getContact();
                 if (contact != null)
-                    contactsFromCats.add(contact);
+                    contacts.add(contact);
             }
         }
-        return contactsFromCats;
+        return contacts;
     }
 
 

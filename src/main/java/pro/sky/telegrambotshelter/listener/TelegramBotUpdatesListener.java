@@ -3,6 +3,8 @@ package pro.sky.telegrambotshelter.listener;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.BotCommand;
+import com.pengrad.telegrambot.model.Message;
+import com.pengrad.telegrambot.model.PhotoSize;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.botcommandscope.BotCommandScopeDefault;
 import com.pengrad.telegrambot.model.request.*;
@@ -13,15 +15,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import pro.sky.telegrambotshelter.model.Report;
+import pro.sky.telegrambotshelter.model.ReportSteps;
 import pro.sky.telegrambotshelter.model.User;
 import pro.sky.telegrambotshelter.service.ShelterService;
 import pro.sky.telegrambotshelter.service.UserService;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
@@ -45,8 +46,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     private final UserService userService;
 
+    private final Report curentReport = new Report();
     private final String VOLUNTEER_NAME = "VOLONTEER_PLACEHOLDER";
     private final String VOLUNTEER_PHONE_NUMBER = "+00000000000";
+
+    private final Long VOLUNTEER_CHAT_ID = 5348835264L;//todo мой айди
     public TelegramBotUpdatesListener(TelegramBot telegramBot, ShelterService shelterService, UserService userService) {
         this.telegramBot = telegramBot;
         this.shelterService = shelterService;
@@ -114,6 +118,18 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         String userName = update.message().chat().firstName();
         String replyString;
         Keyboard inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        if(messageText == null){
+            if(update.message().photo() != null){
+                parseReport(chatId, curentReport, update.message());
+                return;
+            }
+            else {
+                //todo null messageText
+                replyString = "Sorry, something went wrong try again.";
+                sendMessage(chatId, replyString);
+                return;
+            }
+        }
         switch (messageText) {
             case "/start":
                 if (shelterChoice.containsKey(chatId))
@@ -218,15 +234,21 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             case "Send report":
                 replyString = "Placeholder for 'Send report'";
                 sendMessage(chatId, replyString);
+                createReport(chatId, curentReport, "Attach a photo");
                 break;
             case "Call a volunteer":
                 SendContact sendContact = new SendContact(chatId, VOLUNTEER_PHONE_NUMBER, VOLUNTEER_NAME).vcard("Волонтёр приюта Александр")
                         .allowSendingWithoutReply(true);
                 telegramBot.execute(sendContact);
 
+                break;
             default:
-                replyString = "Sorry, something went wrong try again.";
-                sendMessage(chatId, replyString);
+                if(isReportMessage(chatId, curentReport))
+                    parseReport(chatId, curentReport, update.message());
+                else{
+                    replyString = "Sorry, something went wrong try again.";
+                    sendMessage(chatId, replyString);
+                }
         }
 
     }
@@ -379,6 +401,131 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             logger.info("Message: {} sent", message);
         } else {
             logger.error("Error sending. Code: " + response.errorCode());
+        }
+    }
+
+    /**
+     * Метод делает активным отчет, т.е. дальнейшие сообщения являются данными отчета
+     */
+    private void createReport(Long chatId, Report curentReport, String message) {
+        SendResponse response = telegramBot.execute(new SendMessage(chatId, message));
+        if (response.isOk()) {
+            logger.info("Message: {} sent", message);
+            curentReport.nextStep();
+            curentReport.setActive(true);
+        } else {
+            logger.error("Error sending. Code: " + response.errorCode());
+        }
+    }
+
+    /**
+     * Метод делает активным отчет, т.е. дальнейшие сообщения являются данными отчета
+     */
+    private void AttachPhoto(Long chatId, Report curentReport, String message) {
+        SendResponse response = telegramBot.execute(new SendMessage(chatId, message));
+        if (response.isOk()) {
+            logger.info("Message: {} sent", message);
+            curentReport.nextStep();
+            curentReport.setActive(true);
+        } else {
+            logger.error("Error sending. Code: " + response.errorCode());
+        }
+    }
+
+    /**
+     * Метод проверяет идет ли процесс отправки данных отчета
+     */
+    private boolean isReportMessage(Long chatId, Report curentReport) {
+        if(curentReport.isActive()) {
+            return true;
+        /*    SendResponse response = telegramBot.execute(new SendMessage(chatId, message));
+            if (response.isOk()) {
+                logger.info("Message: {} sent", message);
+                curentReport.nextStep();
+                curentReport.setActive(true);
+            } else {
+                logger.error("Error sending. Code: " + response.errorCode());
+            }*/
+        }
+        else
+            return false;
+    }
+
+    /**
+     * Метод формирует отчет из сообщений введеных пользователем
+     */
+    private void parseReport(Long chatId, Report curentReport, Message message) {
+        int i = 0;
+        if (curentReport.isActive()) {
+            String currentText = message.text();
+            switch (curentReport.getCurrentStep()) {
+                case Photo:
+                    if (message.photo() == null) {
+                        SendResponse response = telegramBot.execute(new SendMessage(chatId, "You should attach a photo"));
+                    } else {
+                        curentReport.setPhotos(List.of(message.photo()));
+                        curentReport.nextStep();
+                        SendResponse response = telegramBot.execute(new SendMessage(chatId, "Write a description of current animal's health"));
+                    }
+                    break;
+                case Health:
+                    if (currentText == null) {
+                        SendResponse response = telegramBot.execute(new SendMessage(chatId, "You should write a description of current animal's health"));
+                    } else if (currentText.length() <= 50) {
+                        SendResponse response = telegramBot.execute(new SendMessage(chatId, "Your description of health is not full. Write more"));
+                    } else {
+                        curentReport.setHealth(currentText);
+                        curentReport.nextStep();
+                        SendResponse response = telegramBot.execute(new SendMessage(chatId, "Write a description of a diet"));
+                    }
+                    break;
+                case Diet:
+                    if (currentText == null) {
+                        SendResponse response = telegramBot.execute(new SendMessage(chatId, "You should write a diet"));
+                    } else if (currentText.length() <= 70) {
+                        SendResponse response = telegramBot.execute(new SendMessage(chatId, "Your description of diet is not full. Write more"));
+                    } else {
+                        curentReport.setDiet(currentText);
+                        curentReport.nextStep();
+                        SendResponse response = telegramBot.execute(new SendMessage(chatId, "Describe how animal adapts"));
+                    }
+                    break;
+                case Adaptation:
+                    if (currentText == null) {
+                        SendResponse response = telegramBot.execute(new SendMessage(chatId, "You should describe how animal adapts"));
+                    } else if (currentText.length() <= 30) {
+                        SendResponse response = telegramBot.execute(new SendMessage(chatId, "Your description of adaptation is not full. Write more"));
+                    } else {
+                        curentReport.setAdaptation(currentText);
+                        curentReport.nextStep();
+                        SendResponse response = telegramBot.execute(new SendMessage(chatId, "Describe if animal behaves differently"));
+                    }
+                    break;
+                case Changes:
+                    if (currentText == null) {
+                        SendResponse response = telegramBot.execute(new SendMessage(chatId, "You should describe if animal behaves differently or write 'Ok'"));
+                    } else {
+                        curentReport.setChanges(currentText);
+
+                        //отправка сообщений волонтеру
+                        String f_id = curentReport.getPhotos().stream()
+                                .sorted(Comparator.comparing(PhotoSize::fileSize).reversed())
+                                .findFirst()
+                                .orElse(null).fileId();
+
+                        SendPhoto photoVolunteer = new SendPhoto(VOLUNTEER_CHAT_ID, f_id);
+                        SendResponse response = telegramBot.execute(photoVolunteer);
+
+
+
+                        //curentReport.nextStep();
+                       //curentReport.setActive(false);
+
+                    }
+                    break;
+                default:
+                    SendResponse response = telegramBot.execute(new SendMessage(chatId, "smth went wrong. Try again. Push button 'Send report'"));
+            }
         }
     }
 }

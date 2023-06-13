@@ -6,13 +6,14 @@ import org.springframework.stereotype.Repository;
 import pro.sky.telegrambotshelter.model.ContactsForCatsShelter;
 
 import java.util.List;
-import java.util.Optional;
 
 
 @Repository
 public interface ContactsForCatsShelterRepository extends JpaRepository<ContactsForCatsShelter, Long> {
 
     @Query(value = "SELECT * FROM contacts_For_Cats_Shelter", nativeQuery = true)
-    List<ContactsForCatsShelter> findAllContacts();
-    Optional<ContactsForCatsShelter> findByContact(String contact);
+    List<ContactsForCatsShelter> findAllUsersId();
+
+    void deleteAllByUserId(Long userId);
+
 }

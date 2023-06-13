@@ -1,6 +1,8 @@
 package pro.sky.telegrambotshelter.service;
 
+import liquibase.pro.packaged.S;
 import org.springframework.stereotype.Service;
+import pro.sky.telegrambotshelter.model.Shelter;
 import pro.sky.telegrambotshelter.repository.ShelterRepository;
 
 /**сервис для работы с БД приютов*/
@@ -95,6 +97,13 @@ public class ShelterService {
     /**метод для получения Id приюта*/
     public Long getShelterId(String shelterType) {
         return shelterRepository.findShelterByShelterType(shelterType).getId();
+    }
+
+    /**
+     * поиск приюта по Id волонтера
+     */
+    public Shelter getShelterByIdVolunteer(Long idVolunteer) {
+        return shelterRepository.findByVolunteerChatId(Math.toIntExact(idVolunteer));
     }
 
 }

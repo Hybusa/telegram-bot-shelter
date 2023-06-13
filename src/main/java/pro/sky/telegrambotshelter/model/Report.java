@@ -2,37 +2,21 @@ package pro.sky.telegrambotshelter.model;
 
 import com.pengrad.telegrambot.model.PhotoSize;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Iterator;
 
 public class Report {
 
-    private int messageId;
-    String fullName;
-    String userName;
+    private Long chatId;
+    private LocalDateTime addedDate;
     private boolean isActive;
+    private byte[] dataPhoto;
     private String diet;
     private String health;
     private String adaptation;
     private String changes;
 
     List<PhotoSize> photos;
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
 
     public List<PhotoSize> getPhotos() {
         return photos;
@@ -41,12 +25,37 @@ public class Report {
     public void setPhotos(List<PhotoSize> photos) {
         this.photos = photos;
     }
+
+    public Long getChatId() {
+        return chatId;
+    }
+
+    public void setChatId(Long chatId) {
+        this.chatId = chatId;
+    }
+
+    public LocalDateTime getAddedDate() {
+        return addedDate;
+    }
+
+    public void setAddedDate(LocalDateTime addedDate) {
+        this.addedDate = addedDate;
+    }
+
     public boolean isActive() {
         return isActive;
     }
 
     public void setActive(boolean active) {
         isActive = active;
+    }
+
+    public byte[] getDataPhoto() {
+        return dataPhoto;
+    }
+
+    public void setDataPhoto(byte[] dataPhoto) {
+        this.dataPhoto = dataPhoto;
     }
 
     public String getDiet() {
@@ -106,39 +115,4 @@ public class Report {
             currentStep = null;
     }
 
-    public String doTextReport() {
-        return "Health:" + "\n" + health +
-                "\nDiet:" + "\n" + diet +
-                "\nAdaptation:" + "\n" + adaptation +
-                "\n Changes:" + "\n" + changes;
-    }
-    public String doFullTextReport(Long chatId) {
-        return "Report from:" + "\n" + fullName +
-                "\nUsername: " + userName +
-                "\nChatId: " + chatId +
-                "\n" +
-                "\nHealth:" + "\n" + health +
-                "\nDiet:" + "\n" + diet +
-                "\nAdaptation:" + "\n" + adaptation +
-                "\nChanges:" + "\n" + changes;
-    }
-    public int getMessageId() {
-        return messageId;
-    }
-
-    public void setMessageId(int messageId) {
-        this.messageId = messageId;
-    }
-
-    public void setNullFields(){
-        health = null;
-        diet = null;
-        adaptation = null;
-        changes = null;
-        userName = null;
-        fullName = null;
-        messageId = 0;
-
-        photos = new ArrayList<PhotoSize>();
-    }
 }

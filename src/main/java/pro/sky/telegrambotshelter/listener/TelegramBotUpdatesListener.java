@@ -12,7 +12,9 @@ import com.pengrad.telegrambot.response.SendResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import pro.sky.telegrambotshelter.model.ContactsForCatsShelter;
 import pro.sky.telegrambotshelter.model.User;
 import pro.sky.telegrambotshelter.service.ShelterService;
 import pro.sky.telegrambotshelter.service.UserService;
@@ -88,11 +90,42 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     private void contactReceiving(Update update) {
         //Saving contact data to the DBs
+        //метод для сохранения контакта в юзера
+        //userService.saveContactsByChatId(Long chatId)
+
+        //String shelterTypeChoice = userService.getUsersShelterTypeChoice(Long chatId)
+        //Long userId = userService.getUserIdByChatId(Long chatId)
+
+        //if(shelterTypeChoice.equals("cats")) {
+
+        //contactsForCatsShelterService.save(userId);
+        //} else if(shelterTypeChoice.equals("dogs")) {
+
+        //contactsForDogsShelterService.save(userId);
+        // }
 
         telegramBot.execute(new SendMessage(update.message().from().id(), "Thank you. Our volunteer will contact you!")
                 .replyMarkup(STANDARD_KEYBOARD_MARKUP));
 
     }
+
+   // @Scheduled(cron = "* 0/5 * * * *")
+    public void checker() {
+        Long volunteerChatId = 12222L;
+        //List<ContactsForCatsShelter> contactsForCat = contactsForCatsShelterService.getAll();
+        //List<ContactsForDogsShelter> contactsForDog = contactsForDogsShelterService.getAll();
+
+        if (contactsForCat == null)
+            return;
+        SendResponse response = telegramBot.execute(new SendMessage(volunteerChatId, contactsForCat.toString()));
+        if (response.isOk()) {
+
+        } else {
+            logger.error("Error sending. Code: " + response.errorCode());
+        }
+    }
+
+
 
     private void stage3ChoiceUpdateParser(Update update) {
     }

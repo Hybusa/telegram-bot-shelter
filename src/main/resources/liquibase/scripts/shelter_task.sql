@@ -3,12 +3,12 @@
 -- changeset akuznetsov:1
 CREATE TABLE users
 (
-    id      SERIAL PRIMARY KEY,
-    name    VARCHAR(255),
-    chat_id bigint,
-    contact VARCHAR(255),
+    id                  SERIAL PRIMARY KEY,
+    name                VARCHAR(255),
+    chat_id             bigint,
+    contact             VARCHAR(255),
     shelter_type_choice VARCHAR(255),
-    failed  BOOLEAN
+    failed              BOOLEAN
 );
 
 CREATE TABLE shelters
@@ -103,9 +103,36 @@ FROM users
 -- changeset akuznetsov:3
 CREATE TABLE user_shelter_join
 (
-    user_id                       INTEGER REFERENCES users(id),
-    shelter_id                    INTEGER REFERENCES shelters(id)
+    user_id    INTEGER REFERENCES users (id),
+    shelter_id INTEGER REFERENCES shelters (id)
 );
+
+-- changeset a.sychkova:1
+CREATE TABLE contacts_for_cats_shelter
+(
+    user_id SERIAL PRIMARY KEY,
+    name    VARCHAR,
+    contact VARCHAR,
+    FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+SELECT *
+FROM users
+         JOIN contacts_for_cats_shelter cFCS on users.id = cFCS.user_id;
+
+-- changeset a.sychkova:2
+CREATE TABLE contacts_for_dogs_shelter
+(
+    user_id SERIAL PRIMARY KEY,
+    name    VARCHAR,
+    contact VARCHAR,
+    FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+SELECT *
+FROM users
+         JOIN contacts_for_dogs_shelter cFDS on users.id = cFDS.user_id;
+
 
 -- changeset m_yatsushko:4
 ALTER TABLE shelters ALTER COLUMN meeting_recommendations TYPE varchar(1000);

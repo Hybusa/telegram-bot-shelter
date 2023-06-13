@@ -20,6 +20,7 @@ import pro.sky.telegrambotshelter.service.ShelterService;
 import pro.sky.telegrambotshelter.service.UserService;
 
 import javax.annotation.PostConstruct;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -88,6 +89,9 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
 
+    /**
+     * метод для обработки входящих контактов и ответа на это сообщение
+     */
     private void contactReceiving(Update update) {
         //Saving contact data to the DBs
         //метод для сохранения контакта в юзера
@@ -130,9 +134,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private void stage3ChoiceUpdateParser(Update update) {
     }
 
-    private void stage2ChoiceUpdateParser(Update update) {
 
-    }
 
 
     /**
@@ -144,6 +146,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         String messageText = update.message().text();
         String userName = update.message().chat().firstName();
         String replyString;
+        Keyboard inlineKeyboardMarkup = new InlineKeyboardMarkup();
         switch (messageText) {
             case "/start":
                 if (shelterChoice.containsKey(chatId))
@@ -173,7 +176,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                         + userName
                         + "\nWhat would you like to know about a shelter.\n"
                         + shelterService.getGeneralInfo(shelterChoice.get(chatId));
-                InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(new InlineKeyboardButton[][]
+                inlineKeyboardMarkup = new InlineKeyboardMarkup(new InlineKeyboardButton[][]
                         {
                                 new InlineKeyboardButton[]{
                                         new InlineKeyboardButton("Info about the shelter").callbackData("st1_shelter_info")},
@@ -196,8 +199,54 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 choiceMessage(chatId, replyString, inlineKeyboardMarkup);
                 break;
             case "How to get an animal form the shelter":
-                replyString = "Placeholder for 'How to get an animal form the shelter'";
-                sendMessage(chatId, replyString);
+                String shelterChoiceString = shelterChoice.get(chatId);
+                replyString = "Hello, "
+                        + userName
+                        + "\nWhat do you want to know about the adoption process.\n"
+                        + shelterService.getGeneralInfo(shelterChoiceString);
+
+                List<InlineKeyboardButton[]> inlineKeyboardButtonsList = new ArrayList<>();
+                inlineKeyboardButtonsList.add(
+                        new InlineKeyboardButton[]{
+                                new InlineKeyboardButton("How to meet your pet.").callbackData("st2_meeting_recommendations")});
+                inlineKeyboardButtonsList.add(
+                        new InlineKeyboardButton[]{
+                                new InlineKeyboardButton("What documents you will need.").callbackData("st2_document_list")});
+                inlineKeyboardButtonsList.add(
+                        new InlineKeyboardButton[]{
+                                new InlineKeyboardButton("Recommendations for home (young pet)").callbackData("st2_home_recommendations_young")});
+                inlineKeyboardButtonsList.add(
+                        new InlineKeyboardButton[]{
+                                new InlineKeyboardButton("Recommendations for home (old)").callbackData("st2_home_recommendations_old")});
+                inlineKeyboardButtonsList.add(
+                        new InlineKeyboardButton[]{
+                                new InlineKeyboardButton("Recommendations for home (disability)").callbackData("st2_home_recommendations_disability")});
+
+                if(shelterChoiceString.equals("dogs")){
+                    inlineKeyboardButtonsList.add(
+                            new InlineKeyboardButton[]{
+                                    new InlineKeyboardButton("Cynologist recommendations").callbackData("st2_cynologist_recommendations")});
+                    inlineKeyboardButtonsList.add(
+                            new InlineKeyboardButton[]{
+                                    new InlineKeyboardButton("List of recommended cynologists").callbackData("st2_list_of_cynologists")});
+                }
+                inlineKeyboardButtonsList.add(
+                        new InlineKeyboardButton[]{
+                                new InlineKeyboardButton("Why we can deny adoption.").callbackData("st2_why_we_can_deny")});
+                inlineKeyboardButtonsList.add(
+                new InlineKeyboardButton[]{
+                        new InlineKeyboardButton("Send my contact").callbackData("st2_contact_receiving")});
+                inlineKeyboardButtonsList.add(
+                        new InlineKeyboardButton[]{
+                                new InlineKeyboardButton("Call a volunteer").callbackData("st2_call_a_volunteer")});
+
+                InlineKeyboardButton[][] inlineKeyboardButtonsArr = new InlineKeyboardButton[inlineKeyboardButtonsList.size()][1];
+                inlineKeyboardButtonsList.toArray(inlineKeyboardButtonsArr);
+
+                inlineKeyboardMarkup = new InlineKeyboardMarkup(inlineKeyboardButtonsArr);
+
+                choiceMessage(chatId, replyString, inlineKeyboardMarkup);
+
                 break;
             case "Send report":
                 replyString = "Placeholder for 'Send report'";
@@ -289,9 +338,58 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     }
 
     /**
+     * Stage2 choice message parser
+     */
+
+    private void stage2ChoiceUpdateParser(Update update) {
+        Long chatId = update.callbackQuery().from().id();
+        Integer messageId = update.callbackQuery().message().messageId();
+        String shelterChoiceString = shelterChoice.get(chatId);
+        String messageString= "Adoption Menu";
+        switch (update.callbackQuery().data()) {
+            case "st2_meeting_recommendations":
+                messageString = shelterService.getMeetingRecommendation(shelterChoiceString);
+                break;
+            case "st2_document_list":
+                messageString = shelterService.getDocumentsList(shelterChoiceString);
+                break;
+            case "st2_home_recommendations_young":
+                messageString = shelterService.getHomeRecommendationsYoung(shelterChoiceString);
+                break;
+            case "st2_home_recommendations_old":
+                messageString = shelterService.getHomeRecommendationsOld(shelterChoiceString);
+                break;
+            case "st2_home_recommendations_disability":
+                messageString = "Disability button pressed";
+                break;
+            case "st2_cynologist_recommendations":
+                messageString = shelterService.getCynologistRecommendations(shelterChoiceString);
+                break;
+            case "st2_list_of_cynologists":
+                messageString = "List of cynologists button pressed";
+                break;
+            case "st2_why_we_can_deny":
+                messageString = shelterService.getWhyWeCanDeny(shelterChoiceString);
+                break;
+            case "st2_call_a_volunteer":
+                SendResponse contact = telegramBot.execute(new SendContact(chatId, VOLUNTEER_PHONE_NUMBER, VOLUNTEER_NAME)
+                        .allowSendingWithoutReply(true));
+                break;
+            case "st2_contact_receiving":
+                SendResponse response = telegramBot.execute(new SendMessage(chatId, "Click the button to send contact info.")
+                        .replyMarkup(new ReplyKeyboardMarkup(
+                                new KeyboardButton("Send contact").requestContact(true))));
+                break;
+            default:
+                messageString = "smth went wrong";
+        }
+        telegramBot.execute(new EditMessageText(chatId, messageId,messageString).replyMarkup(update.callbackQuery().message().replyMarkup()));
+    }
+
+    /**
      * Создание сообщения с кнопками по выбору типа приюта
      */
-    private void choiceMessage(long chatId, String message, InlineKeyboardMarkup inlineKeyboardMarkups) {
+    private void choiceMessage(long chatId, String message, Keyboard inlineKeyboardMarkups) {
         SendResponse response = telegramBot.execute(new SendMessage(chatId, message)
                 .replyMarkup(inlineKeyboardMarkups));
     }

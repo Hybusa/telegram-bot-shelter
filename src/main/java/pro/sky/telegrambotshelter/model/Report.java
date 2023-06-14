@@ -8,9 +8,10 @@ import java.util.List;
 public class Report {
 
     private Long chatId;
+    private int messageId;
+
     private LocalDateTime addedDate;
     private boolean isActive;
-    private byte[] dataPhoto;
     private String diet;
     private String health;
     private String adaptation;
@@ -48,14 +49,6 @@ public class Report {
 
     public void setActive(boolean active) {
         isActive = active;
-    }
-
-    public byte[] getDataPhoto() {
-        return dataPhoto;
-    }
-
-    public void setDataPhoto(byte[] dataPhoto) {
-        this.dataPhoto = dataPhoto;
     }
 
     public String getDiet() {
@@ -115,4 +108,25 @@ public class Report {
             currentStep = null;
     }
 
+    public String doTextReport() {
+        return "Health:" + "\n" + health +
+                "\nDiet:" + "\n" + diet +
+                "\nAdaptation:" + "\n" + adaptation +
+                "\n Changes" + "\n" + changes;
+    }
+    public int getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(int messageId) {
+        this.messageId = messageId;
+    }
+
+    public void setNullFields(){
+        health = null;
+        diet = null;
+        adaptation = null;
+        changes = null;
+        photos.clear();
+    }
 }

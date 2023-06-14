@@ -12,10 +12,10 @@ import com.pengrad.telegrambot.response.SendResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import pro.sky.telegrambotshelter.model.ContactsForCatsShelter;
 import pro.sky.telegrambotshelter.model.User;
+import pro.sky.telegrambotshelter.service.ContactsForCatsShelterService;
+import pro.sky.telegrambotshelter.service.ContactsForDogsShelterService;
 import pro.sky.telegrambotshelter.service.ShelterService;
 import pro.sky.telegrambotshelter.service.UserService;
 
@@ -46,9 +46,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private final ShelterService shelterService;
 
     private final UserService userService;
-
+    private ContactsForCatsShelterService contactsForCatsShelterService;
+    private ContactsForDogsShelterService contactsForDogsShelterService;
     private final String VOLUNTEER_NAME = "VOLONTEER_PLACEHOLDER";
     private final String VOLUNTEER_PHONE_NUMBER = "+00000000000";
+
     public TelegramBotUpdatesListener(TelegramBot telegramBot, ShelterService shelterService, UserService userService) {
         this.telegramBot = telegramBot;
         this.shelterService = shelterService;
@@ -80,7 +82,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 else if (update.callbackQuery().data().startsWith("st3"))
                     stage3ChoiceUpdateParser(update);
 
-            } else if(update.message().contact()!=null) {
+            } else if (update.message().contact() != null) {
                 contactReceiving(update);
             } else {
                 messageParser(update);
@@ -93,48 +95,29 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      * метод для обработки входящих контактов и ответа на это сообщение
      */
     private void contactReceiving(Update update) {
-        //Saving contact data to the DBs
+
+        long chatId = update.message().chat().id();
+        String messageText = update.message().text();
+        String shelterTypeChoice = userService.getUsersShelterTypeChoice(chatId);
+
         //метод для сохранения контакта в юзера
-        //userService.saveContactsByChatId(Long chatId)
+        userService.saveContacts(new User(update.callbackQuery().from().firstName(), chatId), messageText);
 
-        //String shelterTypeChoice = userService.getUsersShelterTypeChoice(Long chatId)
-        //Long userId = userService.getUserIdByChatId(Long chatId)
-
-        //if(shelterTypeChoice.equals("cats")) {
-
-        //contactsForCatsShelterService.save(userId);
-        //} else if(shelterTypeChoice.equals("dogs")) {
-
-        //contactsForDogsShelterService.save(userId);
-        // }
+        //сохранение контактов в таблицу для контактов приюта собак или кошек
+        if (shelterTypeChoice.equals("cats")) {
+            contactsForCatsShelterService.save(chatId, messageText);
+        } else if (shelterTypeChoice.equals("dogs")) {
+            contactsForDogsShelterService.save(chatId, messageText);
+        }
 
         telegramBot.execute(new SendMessage(update.message().from().id(), "Thank you. Our volunteer will contact you!")
                 .replyMarkup(STANDARD_KEYBOARD_MARKUP));
 
     }
 
-   // @Scheduled(cron = "* 0/5 * * * *")
-    public void checker() {
-        Long volunteerChatId = 12222L;
-        //List<ContactsForCatsShelter> contactsForCat = contactsForCatsShelterService.getAll();
-        //List<ContactsForDogsShelter> contactsForDog = contactsForDogsShelterService.getAll();
-
-        if (contactsForCat == null)
-            return;
-        SendResponse response = telegramBot.execute(new SendMessage(volunteerChatId, contactsForCat.toString()));
-        if (response.isOk()) {
-
-        } else {
-            logger.error("Error sending. Code: " + response.errorCode());
-        }
-    }
-
-
 
     private void stage3ChoiceUpdateParser(Update update) {
     }
-
-
 
 
     /**
@@ -222,7 +205,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                         new InlineKeyboardButton[]{
                                 new InlineKeyboardButton("Recommendations for home (disability)").callbackData("st2_home_recommendations_disability")});
 
-                if(shelterChoiceString.equals("dogs")){
+                if (shelterChoiceString.equals("dogs")) {
                     inlineKeyboardButtonsList.add(
                             new InlineKeyboardButton[]{
                                     new InlineKeyboardButton("Cynologist recommendations").callbackData("st2_cynologist_recommendations")});
@@ -234,8 +217,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                         new InlineKeyboardButton[]{
                                 new InlineKeyboardButton("Why we can deny adoption.").callbackData("st2_why_we_can_deny")});
                 inlineKeyboardButtonsList.add(
-                new InlineKeyboardButton[]{
-                        new InlineKeyboardButton("Send my contact").callbackData("st2_contact_receiving")});
+                        new InlineKeyboardButton[]{
+                                new InlineKeyboardButton("Send my contact").callbackData("st2_contact_receiving")});
                 inlineKeyboardButtonsList.add(
                         new InlineKeyboardButton[]{
                                 new InlineKeyboardButton("Call a volunteer").callbackData("st2_call_a_volunteer")});
@@ -274,14 +257,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             case "st0_cat_shelters":
                 shelterChoice.put(chatId, "cats");
                 userService.updateShelterChoiceByChatId(
-                        new User(update.callbackQuery().from().firstName(),chatId),"cats"
+                        new User(update.callbackQuery().from().firstName(), chatId), "cats"
                 );
                 messageString = "You have selected Cat shelters.";
                 break;
             case "st0_dog_shelters":
                 shelterChoice.put(chatId, "dogs");
                 userService.updateShelterChoiceByChatId(
-                        new User(update.callbackQuery().from().firstName(),chatId),"dogs"
+                        new User(update.callbackQuery().from().firstName(), chatId), "dogs"
                 );
                 messageString = "You have selected Dog shelters.";
                 break;
@@ -302,7 +285,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         Long chatId = update.callbackQuery().from().id();
         Integer messageId = update.callbackQuery().message().messageId();
         String shelterChoiceString = shelterChoice.get(chatId);
-        String messageString= "Shelter Menu";
+        String messageString = "Shelter Menu";
         switch (update.callbackQuery().data()) {
             case "st1_shelter_info":
                 messageString = shelterService.getGeneralInfo(shelterChoiceString);
@@ -334,7 +317,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             default:
                 messageString = "smth went wrong";
         }
-        telegramBot.execute(new EditMessageText(chatId, messageId,messageString).replyMarkup(update.callbackQuery().message().replyMarkup()));
+        telegramBot.execute(new EditMessageText(chatId, messageId, messageString).replyMarkup(update.callbackQuery().message().replyMarkup()));
     }
 
     /**
@@ -345,7 +328,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         Long chatId = update.callbackQuery().from().id();
         Integer messageId = update.callbackQuery().message().messageId();
         String shelterChoiceString = shelterChoice.get(chatId);
-        String messageString= "Adoption Menu";
+        String messageString = "Adoption Menu";
         switch (update.callbackQuery().data()) {
             case "st2_meeting_recommendations":
                 messageString = shelterService.getMeetingRecommendation(shelterChoiceString);
@@ -383,7 +366,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             default:
                 messageString = "smth went wrong";
         }
-        telegramBot.execute(new EditMessageText(chatId, messageId,messageString).replyMarkup(update.callbackQuery().message().replyMarkup()));
+        telegramBot.execute(new EditMessageText(chatId, messageId, messageString).replyMarkup(update.callbackQuery().message().replyMarkup()));
     }
 
     /**

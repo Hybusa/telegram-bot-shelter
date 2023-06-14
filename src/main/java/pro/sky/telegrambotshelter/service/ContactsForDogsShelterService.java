@@ -5,15 +5,37 @@ import pro.sky.telegrambotshelter.model.ContactsForCatsShelter;
 import pro.sky.telegrambotshelter.model.ContactsForDogsShelter;
 import pro.sky.telegrambotshelter.repository.ContactsForDogsShelterRepository;
 
+import java.util.List;
+
 @Service
 public class ContactsForDogsShelterService {
+    private UserService userService;
 
     private ContactsForDogsShelterRepository contactsForDogsShelterRepository;
-    public void save(ContactsForDogsShelter userId){
-        contactsForDogsShelterRepository.save(userId);
+
+    /**
+     * метод для сохранения контактов в таблицу ContactsForDogsShelter
+     */
+    public void save(Long chatId, String contact) {
+        Long userId = userService.getUserIdByChatId(chatId);
+        String name = userService.getUserNameByChatId(chatId);
+
+        contactsForDogsShelterRepository.saveContact(userId, name, contact);
     }
 
-    public void delete(ContactsForDogsShelter userId){
-        contactsForDogsShelterRepository.delete(userId);
+
+    /**
+     * метод получения контактов из таблицы ContactsForDogsShelter
+     */
+    public List<ContactsForDogsShelter> getAll() {
+        return contactsForDogsShelterRepository.findAllContacts();
+    }
+
+    /**
+     * метод удаления контактов из таблицы ContactsForDogsShelter
+     */
+    public void deleteAll(List<ContactsForDogsShelter> contactsForDogsShelter) {
+        contactsForDogsShelterRepository.deleteAll(contactsForDogsShelter);
     }
 }
+

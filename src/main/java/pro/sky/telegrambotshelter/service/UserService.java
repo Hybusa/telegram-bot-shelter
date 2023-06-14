@@ -1,7 +1,5 @@
 package pro.sky.telegrambotshelter.service;
 
-import org.hibernate.query.Query;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pro.sky.telegrambotshelter.model.User;
 import pro.sky.telegrambotshelter.repository.UserRepository;
@@ -40,7 +38,7 @@ public class UserService {
     /**
      * метод для добавления контактов пользователя в БД
      */
-    public void saveContactsByChatId(User user, String contact) {
+    public void saveContacts(User user, String contact) {
         Optional<User> optUser = userRepository.findUserByChatId(user.getChatId());
         User tmpUser;
         tmpUser = optUser.orElse(user);
@@ -66,6 +64,10 @@ public class UserService {
        return userRepository.findUserByChatId(chatId).get().getId();
     }
 
+    public String getUserNameByChatId(Long chatId){
+        return userRepository.findUserByChatId(chatId).get().getName();
+    }
+
     /**
      * метод для получения пользователя по id
      */
@@ -83,46 +85,10 @@ public class UserService {
 
 
     /**
-     * метод для получения list с контактами пользователей приюта для собак
-     */
-    public List<String> getListUsersContactsWithDodShelter() {
-        List<Long> usersId = new ArrayList<>(userRepository.listUsersIdFromDogsShelter());
-
-        return getContacts(usersId);
-    }
-
-
-    /**
      * метод для получения контакта пользователя
      */
     public String getContact(Long chatId) {
         Optional<User> optUser = userRepository.findUserByChatId(chatId);
         return optUser.get().getContact();
     }
-
-    /**
-     * метод для получения list с контактами пользователей приюта для кошек
-     */
-    public List<String> getListUsersContactsWithCatShelter() {
-        List<Long> usersId = new ArrayList<>(userRepository.listUsersIdFromCatsShelter());
-
-        return getContacts(usersId);
-    }
-
-    @NotNull
-    private List<String> getContacts(List<Long> usersId) {
-        List<String> contacts = new ArrayList<>();
-
-        for (Long l : usersId) {
-            Optional<User> optUser = getUserById(l);
-            if (optUser.isPresent()) {
-                String contact = optUser.get().getContact();
-                if (contact != null)
-                    contacts.add(contact);
-            }
-        }
-        return contacts;
-    }
-
-
 }

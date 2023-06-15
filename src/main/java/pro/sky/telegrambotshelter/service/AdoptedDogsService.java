@@ -4,8 +4,11 @@ import org.springframework.stereotype.Service;
 import pro.sky.telegrambotshelter.model.AdoptedDogs;
 import pro.sky.telegrambotshelter.repository.AdoptedDogsRepository;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class AdoptedDogsService {
@@ -26,47 +29,54 @@ public class AdoptedDogsService {
     /**
      * редактирование сущности AdoptedDogs в БД
      */
-    public void update(AdoptedDogs adoptedDogs) {adoptedDogsRepository.save(adoptedDogs);}
+    public void update(AdoptedDogs adoptedDogs) {
+        adoptedDogsRepository.save(adoptedDogs);
+    }
+
+
+    /**
+     * редактирование последней даты очета AdoptedDogs
+     */
+    public void updateLastReports(Long idUser, LocalDateTime localDateTime) {
+
+        Optional<AdoptedDogs> adoptedDogs = adoptedDogsRepository.findById(idUser);
+
+        adoptedDogs.ifPresent(entity -> {
+
+            entity.setLastReportDate(localDateTime);
+            update(entity);
+
+        });
+
+    }
 
     /**
      * удаление сущности AdoptedDogs из БД
      */
-    public void deleteAdoptedDogs(AdoptedDogs adoptedDogs) {
+    public void delete(AdoptedDogs adoptedDogs) {
         adoptedDogsRepository.delete(adoptedDogs);
     }
 
     /**
-     * поиск сущности AdoptedDogs по Id питомца
+     * поиск всех записей adopted_cats
      */
-    public AdoptedDogs findByIdPet(Long idPet) {
-        return adoptedDogsRepository.findByIdPet(idPet);
+    public List<AdoptedDogs> getAll() {
+        return adoptedDogsRepository.findAll();
     }
 
     /**
-     * поиск сущности AdoptedDogs по Id пользователя
+     * получение всех AdoptedDogs в мапу (Id пользователя - AdoptedDog)
      */
-    public AdoptedDogs findByIdUser(Long idUser) {
-        return adoptedDogsRepository.findByIdUser(idUser);
-    }
+    public Map<Long, AdoptedDogs> getAllAdoptedDogsToMap() {
 
+        List<AdoptedDogs> adoptedDogsList = adoptedDogsRepository.findAll();
+        Map<Long, AdoptedDogs> adoptedDogsMap = new HashMap<>();
 
-    /**
-     * поиск всех Id пользователей которые хотят забрать собак
-     */
-    public List<Long> getAllIdUser() {
-
-        List<AdoptedDogs> adoptedDogs = adoptedDogsRepository.findAll();
-        List<Long> idSUsers = new ArrayList<>();
-
-        if (adoptedDogs.isEmpty()) {
-            return null;
-        } else {
-            for (AdoptedDogs aD : adoptedDogs) {
-                idSUsers.add(aD.getIdUser());
-            }
+        for (AdoptedDogs adoptedDog : adoptedDogsList) {
+            adoptedDogsMap.put(adoptedDog.getIdUser(), adoptedDog);
         }
 
-        return idSUsers;
+        return adoptedDogsMap;
 
     }
 

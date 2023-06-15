@@ -11,8 +11,6 @@ import java.util.Optional;
 
 @Repository
 public interface AdoptedCatsRepository extends JpaRepository<AdoptedCats, Long> {
-
-    AdoptedCats findByIdPet (Long idPet);
     AdoptedCats findByIdUser (Long idUser);
 
 }

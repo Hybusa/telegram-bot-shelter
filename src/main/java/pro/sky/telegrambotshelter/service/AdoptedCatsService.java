@@ -4,8 +4,11 @@ import org.springframework.stereotype.Service;
 import pro.sky.telegrambotshelter.model.AdoptedCats;
 import pro.sky.telegrambotshelter.repository.AdoptedCatsRepository;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class AdoptedCatsService {
@@ -30,47 +33,52 @@ public class AdoptedCatsService {
         adoptedCatsRepository.save(adoptedCats);
     }
 
+
+    /**
+     * редактирование последней даты очета AdoptedCats
+     */
+    public void updateLastReports(Long idUser, LocalDateTime localDateTime) {
+
+        Optional<AdoptedCats> adoptedCats = adoptedCatsRepository.findById(idUser);
+
+        adoptedCats.ifPresent(entity -> {
+
+            entity.setLastReportDate(localDateTime);
+            update(entity);
+
+        });
+
+    }
+
     /**
      * удаление сущности AdoptedCats из БД
      */
-    public void deleteAdoptedCats(AdoptedCats adoptedCats) {
+    public void delete(AdoptedCats adoptedCats) {
         adoptedCatsRepository.delete(adoptedCats);
     }
 
-
     /**
-     * поиск сущности AdoptedCats по Id питомца
+     * поиск всех записей adopted_cats
      */
-    public AdoptedCats getByIdPet(Long idPet) {
-        return adoptedCatsRepository.findByIdPet(idPet);
+    public List<AdoptedCats> getAll() {
+        return adoptedCatsRepository.findAll();
     }
 
     /**
-     * поиск сущности AdoptedCats по Id пользователя
+     * получение всех AdoptedCats в мапу (Id пользователя - AdoptedCat)
      */
-    public AdoptedCats getByIdUser(Long idUser) {
-        return adoptedCatsRepository.findByIdUser(idUser);
+    public Map<Long, AdoptedCats> getAllAdoptedCatsToMap() {
 
-    }
+        List<AdoptedCats> adoptedCatsList = adoptedCatsRepository.findAll();
+        Map<Long, AdoptedCats> adoptedCatsMap = new HashMap<>();
 
-    /**
-     * поиск всех Id пользователей которые хотят забрать котов
-     */
-    public List<Long> getAllIdUser() {
-
-        List<AdoptedCats> adoptedCats = adoptedCatsRepository.findAll();
-        List<Long> idSUsers = new ArrayList<>();
-
-        if (adoptedCats.isEmpty()) {
-            return null;
-        } else {
-            for (AdoptedCats aC : adoptedCats) {
-                idSUsers.add(aC.getIdUser());
-            }
+        for (AdoptedCats adoptedCat : adoptedCatsList) {
+            adoptedCatsMap.put(adoptedCat.getIdUser(), adoptedCat);
         }
 
-        return idSUsers;
+        return adoptedCatsMap;
 
     }
+
 
 }

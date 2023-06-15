@@ -75,6 +75,12 @@ public class UserService {
         return getContacts(usersId);
     }
 
+    /** Метод удаления из таблицы users по chat_iD */
+    public void deleteUsersByChatId(Long chatId){
+        Optional<User> optUser =  userRepository.findUserByChatId(chatId);
+        optUser.ifPresent(userRepository::delete);
+    }
+
     @NotNull
     private List<String> getContacts(List<Long> usersId) {
         List<String> contactsFromCats = new ArrayList<>();
@@ -93,5 +99,7 @@ public class UserService {
     public Collection<User> getUserByShelterType(String shelterType) {
         return userRepository.findUserByShelterTypeChoice(shelterType);
     }
+
+
 
 }

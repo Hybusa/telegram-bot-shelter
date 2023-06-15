@@ -13,13 +13,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import pro.sky.telegrambotshelter.enums.ButtonCommands;
+import pro.sky.telegrambotshelter.enums.Phrases;
 import pro.sky.telegrambotshelter.model.User;
 import pro.sky.telegrambotshelter.service.ShelterService;
 import pro.sky.telegrambotshelter.service.UserService;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,13 +30,13 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     @Value("${telegram.bot.info}")
     private String botInfo;
 
-    final Keyboard STANDARD_KEYBOARD_MARKUP = new ReplyKeyboardMarkup(
+    private final Keyboard STANDARD_KEYBOARD_MARKUP = new ReplyKeyboardMarkup(
             new String[]{"Get info about a shelter", "How to get an animal form the shelter"},
             new String[]{"Send report", "Call a volunteer"})
             .resizeKeyboard(true)
             .selective(true);
 
-    Map<Long, String> shelterChoice = new HashMap<>();
+    private Map<Long, String> shelterChoice;
 
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
 
@@ -62,7 +63,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         shelterChoice = userService.getMapUsersChatIdWithChoice();
         telegramBot.setUpdatesListener(this);
         BotCommand[] commandsArr = new BotCommand[]{
-                new BotCommand("/start", "Restart the bot")
+                new BotCommand("/start", Phrases.RESTART_THE_BOT.toString())
         };
         SetMyCommands commands = new SetMyCommands(commandsArr);
         commands.scope(new BotCommandScopeDefault());
@@ -75,7 +76,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     @Override
     public int process(List<Update> updates) {
         updates.forEach(update -> {
-            logger.info("Processing update: {}", update.toString());
+            logger.info(Phrases.PROCESSING_UPDATE.toString(), update.toString());
 
             if (update.callbackQuery() != null) {
                 if (update.callbackQuery().data().startsWith("st0"))
@@ -94,7 +95,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     messageParser(update);
             } else if (update.myChatMember() != null) {
                 if (update.myChatMember().newChatMember().status() == ChatMember.Status.kicked) {
-                    //TODO удалить из базы по чат id!
+                    userService.deleteUsersByChatId(update.message().chat().id());
                 }
             }
         });
@@ -107,15 +108,16 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private void contactReceiving(Update update) {
         //TODO Saving contact data to the DBs
 
-        SendMessage contactReceivingResponse = new SendMessage(update.message().from().id(), "Thank you. Our volunteer will contact you!")
+        SendMessage contactReceivingResponse = new SendMessage(update.message().from().id(),
+                Phrases.CONTACT_RECEIVED.toString())
                 .replyMarkup(STANDARD_KEYBOARD_MARKUP);
 
         SendResponse response = telegramBot.execute(contactReceivingResponse);
 
         if (response.isOk())
-            logger.info("Response is {}", response);
+            logger.info(Phrases.RESPONSE_STATUS.toString(), response);
         else
-            logger.error("Error sending. Code: " + response.errorCode());
+            logger.error(Phrases.ERROR_SENDING.toString() + response.errorCode());
     }
 
     private void stage3ChoiceUpdateParser(Update update) {
@@ -126,12 +128,13 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      * ОБработка вхдящего сообщения
      */
     private void messageParser(Update update) {
-        logger.info("Processing update: {}", update);
+        logger.info(Phrases.PROCESSING_UPDATE.toString(), update);
         long chatId = update.message().chat().id();
         String messageText = update.message().text();
         String userName = update.message().chat().firstName();
         String replyString;
         Keyboard inlineKeyboardMarkup;
+
         switch (messageText) {
             case "/start":
                 if (shelterChoice.containsKey(chatId)) {
@@ -144,9 +147,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
                 choiceMessage(
                         chatId,
-                        "Please choose a type of shelter you're looking for",
-                        new InlineKeyboardMarkup(new InlineKeyboardButton("Cat").callbackData("st0_cat_shelters"),
-                                new InlineKeyboardButton("Dog").callbackData("st0_dog_shelters"))
+                        Phrases.SHELTER_CHOICE_MESSAGE.toString(),
+                        new InlineKeyboardMarkup(new InlineKeyboardButton("Cat")
+                                .callbackData(ButtonCommands.STAGE_0_CATS.toString()),
+                                new InlineKeyboardButton("Dog")
+                                        .callbackData(ButtonCommands.STAGE_0_DOGS.toString()))
                 );
                 break;
             case "Get info about a shelter":
@@ -154,25 +159,30 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                         + userName
                         + "\nWhat would you like to know about a shelter.\n"
                         + shelterService.getGeneralInfo(shelterChoice.get(chatId));
-                inlineKeyboardMarkup = new InlineKeyboardMarkup(new InlineKeyboardButton[][]
-                        {
-                                new InlineKeyboardButton[]{
-                                        new InlineKeyboardButton("Info about the shelter").callbackData("st1_shelter_info")},
-                                new InlineKeyboardButton[]{
-                                        new InlineKeyboardButton("Shelter schedule").callbackData("st1_shelter_schedule")},
-                                new InlineKeyboardButton[]{
-                                        new InlineKeyboardButton("Shelter address").callbackData("st1_shelter_address")},
-                                new InlineKeyboardButton[]{
-                                        new InlineKeyboardButton("How to get to the shelter").callbackData("st1_shelter_path")},
-                                new InlineKeyboardButton[]{
-                                        new InlineKeyboardButton("Security contacts to get a pass").callbackData("st1_shelter_security_pass")},
-                                new InlineKeyboardButton[]{
-                                        new InlineKeyboardButton("Shelter safety requirements").callbackData("st1_shelter_safety_requirements")},
-                                new InlineKeyboardButton[]{
-                                        new InlineKeyboardButton("Call a volunteer").callbackData("st1_call_a_volunteer")},
-                                new InlineKeyboardButton[]{
-                                        new InlineKeyboardButton("Send my contact").callbackData("st1_contact_receiving")}
-                        });
+                inlineKeyboardMarkup = new InlineKeyboardMarkup(new InlineKeyboardButton[]{
+                        new InlineKeyboardButton("Info about the shelter")
+                                .callbackData("st1_shelter_info")},
+                        new InlineKeyboardButton[]{
+                                new InlineKeyboardButton("Shelter schedule")
+                                        .callbackData("st1_shelter_schedule")},
+                        new InlineKeyboardButton[]{
+                                new InlineKeyboardButton("Shelter address")
+                                        .callbackData("st1_shelter_address")},
+                        new InlineKeyboardButton[]{
+                                new InlineKeyboardButton("How to get to the shelter")
+                                        .callbackData("st1_shelter_path")},
+                        new InlineKeyboardButton[]{
+                                new InlineKeyboardButton("Security contacts to get a pass")
+                                        .callbackData("st1_shelter_security_pass")},
+                        new InlineKeyboardButton[]{
+                                new InlineKeyboardButton("Shelter safety requirements")
+                                        .callbackData("st1_shelter_safety_requirements")},
+                        new InlineKeyboardButton[]{
+                                new InlineKeyboardButton("Call a volunteer")
+                                        .callbackData("st1_call_a_volunteer")},
+                        new InlineKeyboardButton[]{
+                                new InlineKeyboardButton("Send my contact")
+                                        .callbackData("st1_contact_receiving")});
 
 
                 choiceMessage(chatId, replyString, inlineKeyboardMarkup);
@@ -228,8 +238,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
                 break;
             case "Send report":
-                replyString = "Placeholder for 'Send report'";
-                sendMessage(chatId, replyString);
+                inlineKeyboardMarkup = new InlineKeyboardMarkup(
+                        new InlineKeyboardButton("Everything is right. SendReport")
+                                .callbackData("st3_send_report")
+                );
+                choiceMessage(update.message().chat().id(), "REPORT",inlineKeyboardMarkup);
                 break;
             case "Call a volunteer":
                 SendContact sendContact = new SendContact(chatId, VOLUNTEER_PHONE_NUMBER, VOLUNTEER_NAME).vcard("Волонтёр приюта Александр")
@@ -258,7 +271,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 .replyMarkup(new ReplyKeyboardRemove())
                 .disableNotification(true);
         SendResponse response = telegramBot.execute(message);
-        if(response.isOk())
+        if (response.isOk())
             logger.info("Response is {}", response);
         else
             logger.error("Error : " + response.errorCode());
@@ -296,7 +309,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 .replyMarkup(STANDARD_KEYBOARD_MARKUP);
         SendResponse response = telegramBot.execute(sendMenuMessage);
 
-        if(response.isOk())
+        if (response.isOk())
             logger.info("Response is {}", response);
         else
             logger.error("Error : " + response.errorCode());
@@ -333,7 +346,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 SendResponse contact = telegramBot.execute(new SendContact(chatId, VOLUNTEER_PHONE_NUMBER, VOLUNTEER_NAME)
                         .allowSendingWithoutReply(true));
 
-                if(contact.isOk())
+                if (contact.isOk())
                     logger.info("Response is {}", contact);
                 else
                     logger.error("Error : " + contact.errorCode());
@@ -344,7 +357,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                         .replyMarkup(new ReplyKeyboardMarkup(
                                 new KeyboardButton("Send contact").requestContact(true))));
 
-                if(response.isOk())
+                if (response.isOk())
                     logger.info("Response is {}", response);
                 else
                     logger.error("Error : " + response.errorCode());
@@ -353,7 +366,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             default:
                 messageString = "smth went wrong";
         }
-        telegramBot.execute(new EditMessageText(chatId, messageId, messageString).replyMarkup(update.callbackQuery().message().replyMarkup()));
+       telegramBot.execute(new EditMessageText(chatId, messageId, messageString).replyMarkup(update.callbackQuery().message().replyMarkup()));
     }
 
     /**
@@ -379,12 +392,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 messageString = shelterService.getHomeRecommendationsOld(shelterChoiceString);
                 break;
             case "st2_home_recommendations_disability":
+                //TODO DISABILITY FROM DB
                 messageString = "Disability button pressed";
                 break;
             case "st2_cynologist_recommendations":
                 messageString = shelterService.getCynologistRecommendations(shelterChoiceString);
                 break;
             case "st2_list_of_cynologists":
+                //TODO DB STUFF
                 messageString = "List of cynologists button pressed";
                 break;
             case "st2_why_we_can_deny":
@@ -394,10 +409,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 SendResponse contact = telegramBot.execute(new SendContact(chatId, VOLUNTEER_PHONE_NUMBER, VOLUNTEER_NAME)
                         .allowSendingWithoutReply(true));
 
-                if(contact.isOk())
-                    logger.info("Response is {}", contact);
+                if (contact.isOk())
+                    logger.info(Phrases.RESPONSE_STATUS.toString(), contact);
                 else
-                    logger.error("Error : " + contact.errorCode());
+                    logger.error(Phrases.RESPONSE_STATUS.toString() + contact.errorCode());
 
                 break;
             case "st2_contact_receiving":
@@ -406,7 +421,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                                 new KeyboardButton("Send contact").requestContact(true))));
 
                 if (response.isOk())
-                    logger.info("Response is {}", response);
+                    logger.info(Phrases.RESPONSE_STATUS.toString(), response);
                 else
                     logger.error("Error sending. Code: " + response.errorCode());
 
@@ -424,10 +439,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         SendResponse response = telegramBot.execute(new SendMessage(chatId, message)
                 .replyMarkup(inlineKeyboardMarkups));
 
-        if(response.isOk())
-            logger.info("Response is {}", response);
+        if (response.isOk())
+            logger.info(Phrases.RESPONSE_STATUS.toString(), response);
         else
-            logger.error("Error : " + response.errorCode());
+            logger.error(Phrases.ERROR_SENDING.toString() + response.errorCode());
     }
 
     /**
@@ -447,6 +462,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         if (response.isOk())
             logger.info("Message: {} sent", message);
         else
-            logger.error("Error sending. Code: " + response.errorCode());
+            logger.error(Phrases.ERROR_SENDING.toString() + response.errorCode());
     }
 }

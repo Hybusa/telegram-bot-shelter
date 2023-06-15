@@ -103,15 +103,23 @@ public class ReportsScheduler {
                 .stream()
                 .filter(lastReport -> lastReport.getLastReportDate() != null)
                 .filter(lastReport -> lastReport.getLastReportDate().plusDays(2).isBefore(localDateTime))
-                .forEach(adoptedCats -> usersVolunteerId.put(idUserMap.get(adoptedCats.getIdUser()),
-                            petIdShelterMap.get(adoptedCats.getIdPet()).getShelter().getVolunteerChatId()));
+                .forEach(adoptedCats -> {
+
+                    usersVolunteerId.put(idUserMap.get(adoptedCats.getIdUser()),
+                            petIdShelterMap.get(adoptedCats.getIdPet()).getShelter().getVolunteerChatId());
+
+                });
 
         adoptedDogsList
                 .stream()
                 .filter(lastReport -> lastReport.getLastReportDate() != null)
                 .filter(lastReport -> lastReport.getLastReportDate().plusDays(2).isBefore(localDateTime))
-                .forEach(adoptedDogs -> usersVolunteerId.put(idUserMap.get(adoptedDogs.getIdUser()),
-                            petIdShelterMap.get(adoptedDogs.getIdPet()).getShelter().getVolunteerChatId()));
+                .forEach(adoptedDogs -> {
+
+                    usersVolunteerId.put(idUserMap.get(adoptedDogs.getIdUser()),
+                            petIdShelterMap.get(adoptedDogs.getIdPet()).getShelter().getVolunteerChatId());
+
+                });
 
         if (usersVolunteerId.isEmpty()) {
             return null;

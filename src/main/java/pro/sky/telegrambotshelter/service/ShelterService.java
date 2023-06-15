@@ -5,6 +5,10 @@ import org.springframework.stereotype.Service;
 import pro.sky.telegrambotshelter.model.Shelter;
 import pro.sky.telegrambotshelter.repository.ShelterRepository;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**сервис для работы с БД приютов*/
 @Service
 public class ShelterService {
@@ -94,16 +98,21 @@ public class ShelterService {
         return shelterRepository.findShelterByShelterType(shelterType).getWhyWeCanDeny();
     }
 
-    /**метод для получения Id приюта*/
-    public Long getShelterId(String shelterType) {
-        return shelterRepository.findShelterByShelterType(shelterType).getId();
+    /**
+     * получение всех приютов в мапу (Id чат волонтера - приют)
+     * */
+    public Map<Long, Shelter> getAllSheltersToMap() {
+
+        Map<Long, Shelter> shelterMap = new HashMap<>();
+        List<Shelter> shelterList = shelterRepository.findAll();
+
+        for (Shelter shelter: shelterList) {
+            shelterMap.put(shelter.getVolunteerChatId(), shelter);
+        }
+
+        return shelterMap;
+
     }
 
-    /**
-     * поиск приюта по Id волонтера
-     */
-    public Shelter getShelterByIdVolunteer(Long idVolunteer) {
-        return shelterRepository.findByVolunteerChatId(Math.toIntExact(idVolunteer));
-    }
 
 }

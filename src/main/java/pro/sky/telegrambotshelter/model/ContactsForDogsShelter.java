@@ -16,6 +16,12 @@ public class ContactsForDogsShelter {
 
     public ContactsForDogsShelter(){}
 
+    public ContactsForDogsShelter(Long user_id, String name, String contact) {
+        this.user_id = user_id;
+        this.name = name;
+        this.contact = contact;
+    }
+
     public Long getUser_id() {
         return user_id;
     }

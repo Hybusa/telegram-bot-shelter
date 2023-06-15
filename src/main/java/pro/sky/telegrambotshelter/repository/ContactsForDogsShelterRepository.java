@@ -15,8 +15,4 @@ public interface ContactsForDogsShelterRepository extends JpaRepository<Contacts
     @Query(value = "SELECT * FROM contacts_For_Dogs_Shelter", nativeQuery = true)
     List<ContactsForDogsShelter> findAllContacts();
 
-    @Modifying
-    @Transactional
-    @Query(value = "INSERT INTO contacts_For_Dogs_Shelter(user_Id, name, contact) values (?,?,?)", nativeQuery = true)
-    void saveContact(Long user_id, String name, String contact);
 }

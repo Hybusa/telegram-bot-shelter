@@ -13,6 +13,12 @@ public class ContactsForCatsShelter {
     public ContactsForCatsShelter() {
     }
 
+    public ContactsForCatsShelter(Long user_Id, String name, String contact) {
+        this.user_Id = user_Id;
+        this.name = name;
+        this.contact = contact;
+    }
+
     public Long getUser_Id() {
         return user_Id;
     }

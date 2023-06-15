@@ -95,11 +95,21 @@ public class UserService {
         }
         return contactsFromCats;
     }
-    /** поиск всех пользователей по типу приюта*/
-    public Collection<User> getUserByShelterType(String shelterType) {
-        return userRepository.findUserByShelterTypeChoice(shelterType);
+
+    /**
+     * получение всех пользователей в мапу (Id пользователя - пользователь)
+     * */
+    public Map<Long, User> getAllByIdNameMap() {
+
+        List<User> userList = userRepository.findAll();
+        Map<Long, User> usersIdNameMap = new HashMap<>();
+
+        for (User user: userList) {
+            usersIdNameMap.put(user.getId(), user);
+        }
+
+        return usersIdNameMap;
+
     }
-
-
 
 }

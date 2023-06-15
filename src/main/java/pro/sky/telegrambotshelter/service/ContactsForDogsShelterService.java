@@ -13,6 +13,11 @@ public class ContactsForDogsShelterService {
 
     private ContactsForDogsShelterRepository contactsForDogsShelterRepository;
 
+    public ContactsForDogsShelterService(UserService userService, ContactsForDogsShelterRepository contactsForDogsShelterRepository) {
+        this.userService = userService;
+        this.contactsForDogsShelterRepository = contactsForDogsShelterRepository;
+    }
+
     /**
      * метод для сохранения контактов в таблицу ContactsForDogsShelter
      */
@@ -20,7 +25,8 @@ public class ContactsForDogsShelterService {
         Long userId = userService.getUserIdByChatId(chatId);
         String name = userService.getUserNameByChatId(chatId);
 
-        contactsForDogsShelterRepository.saveContact(userId, name, contact);
+        ContactsForDogsShelter contactsForDogsShelter = new ContactsForDogsShelter(userId, name, contact);
+        contactsForDogsShelterRepository.save(contactsForDogsShelter);
     }
 
 

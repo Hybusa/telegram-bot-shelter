@@ -15,6 +15,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     /**метод для поиска пользователя по chat_id*/
     Optional<User> findUserByChatId(Long id);
 
+    List<User> findAllByShelterTypeChoice(String choice);
+
 
     /**список chat_id пользователей*/
     @Query(value = "SELECT chat_id FROM users", nativeQuery = true)

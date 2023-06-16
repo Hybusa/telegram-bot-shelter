@@ -31,23 +31,29 @@ public class ContactScheduler {
         this.contactsForDogsShelterService = contactsForDogsShelterService;
     }
 
-    // @Scheduled(cron = "0 * * * *")
+    /**
+     * метод для отправки каждый час списка контактов волонтеру приюта для кошек
+     */
+     @Scheduled(cron = "0 * * * *")
     public void checkerForCatShelter() {
 
-        int volunteerChatIdCatsShelter = shelterService.getVolunteerChatId("cats");
-        List<ContactsForCatsShelter> contactsForCat = contactsForCatsShelterService.getAll();
+        int volunteerChatIdCatsShelter = shelterService.getVolunteerChatId("Cats");
+        List<ContactsForCatsShelter> contactsForCatsShelter = contactsForCatsShelterService.getAll();
 
-        if (contactsForCat == null)
+        if (contactsForCatsShelter == null)
             return;
-        SendResponse response = telegramBot.execute(new SendMessage(volunteerChatIdCatsShelter, contactsForCat.toString()));
+        SendResponse response = telegramBot.execute(new SendMessage(volunteerChatIdCatsShelter, contactsForCatsShelter.toString()));
         if (response.isOk()) {
-            contactsForCatsShelterService.deleteAll(contactsForCat);
+            contactsForCatsShelterService.deleteAll(contactsForCatsShelter);
         } else {
             logger.error("Error sending. Code: " + response.errorCode());
         }
     }
 
-    // @Scheduled(cron = "0 * * * *")
+    /**
+     * метод для отправки каждый час списка контактов волонтеру приюта для собак
+     */
+     @Scheduled(cron = "0 * * * *")
     public void checkerForDogShelter() {
 
         int volunteerChatIdDogsShelter = shelterService.getVolunteerChatId("dogs");

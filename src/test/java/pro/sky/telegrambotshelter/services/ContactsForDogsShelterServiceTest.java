@@ -1,14 +1,13 @@
 package pro.sky.telegrambotshelter.services;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import pro.sky.telegrambotshelter.model.ContactsForCatsShelter;
 import pro.sky.telegrambotshelter.model.ContactsForDogsShelter;
 import pro.sky.telegrambotshelter.repository.ContactsForDogsShelterRepository;
-import pro.sky.telegrambotshelter.service.ContactsForCatsShelterService;
 import pro.sky.telegrambotshelter.service.ContactsForDogsShelterService;
 import pro.sky.telegrambotshelter.service.UserService;
 
@@ -29,24 +28,31 @@ public class ContactsForDogsShelterServiceTest {
     @MockBean
     private UserService userService;
 
-    private final ContactsForDogsShelter contact = new ContactsForDogsShelter(333L, "Sam", "33333");
+    private ContactsForDogsShelterService contactsForDogsShelterService;
 
+    private Long userId = 333L;
+    private Long chatId = 222L;
+    private String name = "Sam";
+    private String userContact = "33333";
+    private final ContactsForDogsShelter contact = new ContactsForDogsShelter(userId, name, userContact);
+
+    @BeforeEach
+    public void initEach() {
+        contactsForDogsShelterService = new ContactsForDogsShelterService(userService, contactsForDogsShelterRepository);
+    }
 
     @Test
     void save() {
-        ContactsForDogsShelterService contactsForDogsShelterService = new ContactsForDogsShelterService(userService, contactsForDogsShelterRepository);
+        when(userService.getUserIdByChatId(chatId)).thenReturn(userId);
+        when(userService.getUserNameByChatId(chatId)).thenReturn(name);
 
-        when(userService.getUserIdByChatId(3333L)).thenReturn(333L);
-        when(userService.getUserNameByChatId(3333L)).thenReturn("Sam");
-
-        contactsForDogsShelterService.save(3333L, "33333");
+        contactsForDogsShelterService.save(chatId, userContact);
 
         verify(contactsForDogsShelterRepository).save(contact);
     }
 
     @Test
     void getAll() {
-        ContactsForDogsShelterService contactsForDogsShelterService = new ContactsForDogsShelterService(userService, contactsForDogsShelterRepository);
         List<ContactsForDogsShelter> contactsForDogsShelters = new ArrayList<>();
         contactsForDogsShelters.add(contact);
 
@@ -57,8 +63,7 @@ public class ContactsForDogsShelterServiceTest {
     }
 
     @Test
-    void deleteAll(){
-        ContactsForDogsShelterService contactsForDogsShelterService = new ContactsForDogsShelterService(userService, contactsForDogsShelterRepository);
+    void deleteAll() {
         List<ContactsForDogsShelter> contactsForDogsShelters = new ArrayList<>();
         contactsForDogsShelters.add(contact);
 

@@ -1,5 +1,6 @@
 package pro.sky.telegrambotshelter.services;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -10,6 +11,7 @@ import pro.sky.telegrambotshelter.repository.UserRepository;
 import pro.sky.telegrambotshelter.service.UserService;
 
 import java.util.*;
+
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,12 +21,22 @@ public class UserServiceTest {
     @MockBean
     private UserRepository userRepository;
 
-    private User user = new User("Sam", 2344L);
+    private String shelterChoice = "cats";
+    private Long userId = 222L;
+    private String contact = "2222222";
+    private String name = "Sam";
+    private Long chatId = 2344L;
+    private User user = new User(name, chatId);
+
+    private UserService userService1;
+
+    @BeforeEach
+    public void initEach() {
+        userService1 = new UserService(userRepository);
+    }
 
     @Test
     void save() {
-        UserService userService1 = new UserService(userRepository);
-
         userService1.save(user);
 
         verify(userRepository).save(user);
@@ -32,9 +44,6 @@ public class UserServiceTest {
 
     @Test
     void updateShelterChoiceByChatId() {
-        String shelterChoice = "cats";
-        UserService userService1 = new UserService(userRepository);
-
         userService1.updateShelterChoiceByChatId(user, shelterChoice);
 
         verify(userRepository).findUserByChatId(user.getChatId());
@@ -44,9 +53,6 @@ public class UserServiceTest {
 
     @Test
     void saveContacts() {
-        String contact = "2222222";
-        UserService userService1 = new UserService(userRepository);
-
         userService1.saveContacts(user, contact);
 
         verify(userRepository).findUserByChatId(user.getChatId());
@@ -57,10 +63,9 @@ public class UserServiceTest {
     void getMapUsersChatIdWithChoice() {
         Map<Long, String> expected = new HashMap<>();
         List<User> userList = new ArrayList<>();
-        user.setShelterTypeChoice("cats");
         userList.add(user);
+        user.setShelterTypeChoice(shelterChoice);
         expected.put(user.getChatId(), user.getShelterTypeChoice());
-        UserService userService1 = new UserService(userRepository);
 
         when(userRepository.findAll()).thenReturn(userList);
 
@@ -70,8 +75,7 @@ public class UserServiceTest {
 
     @Test
     void getUserIdByChatId() {
-        user.setId(222L);
-        UserService userService1 = new UserService(userRepository);
+        user.setId(userId);
 
         when(userRepository.findUserByChatId(user.getChatId())).thenReturn(Optional.of(user));
 
@@ -81,8 +85,6 @@ public class UserServiceTest {
 
     @Test
     void getUserNameByChatId() {
-        UserService userService1 = new UserService(userRepository);
-
         when(userRepository.findUserByChatId(user.getChatId())).thenReturn(Optional.of(user));
 
         String actual = userService1.getUserNameByChatId(user.getChatId());
@@ -91,9 +93,8 @@ public class UserServiceTest {
 
     @Test
     void getUserById() {
-        Optional<User> user = Optional.of(new User("Sam", 2344L));
-        user.get().setId(222l);
-        UserService userService1 = new UserService(userRepository);
+        Optional<User> user = Optional.of(new User(name, chatId));
+        user.get().setId(userId);
 
         when(userRepository.findById(user.get().getId())).thenReturn(user);
 
@@ -103,8 +104,7 @@ public class UserServiceTest {
 
     @Test
     void getUsersShelterTypeChoice() {
-        user.setShelterTypeChoice("cats");
-        UserService userService1 = new UserService(userRepository);
+        user.setShelterTypeChoice(shelterChoice);
 
         when(userRepository.findUserByChatId(user.getChatId())).thenReturn(Optional.of(user));
 
@@ -114,8 +114,7 @@ public class UserServiceTest {
 
     @Test
     void getContact() {
-        user.setContact("2222222");
-        UserService userService1 = new UserService(userRepository);
+        user.setContact(contact);
 
         when(userRepository.findUserByChatId(user.getChatId())).thenReturn(Optional.of(user));
 

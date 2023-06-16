@@ -1,5 +1,6 @@
 package pro.sky.telegrambotshelter.services;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -28,23 +29,29 @@ public class ContactsForCatsShelterServiceTest {
     @MockBean
     private UserService userService;
 
-    private final ContactsForCatsShelter contact = new ContactsForCatsShelter(333L, "Sam", "33333");
+    private Long userId = 333L;
+    private Long chatId = 222L;
+    private String name = "Sam";
+    private String userContact = "33333";
+    private final ContactsForCatsShelter contact = new ContactsForCatsShelter(userId, name, userContact);
+    private ContactsForCatsShelterService contactsForCatsShelterService;
+    @BeforeEach
+    public void initEach() {
+        contactsForCatsShelterService = new ContactsForCatsShelterService(userService, contactsForCatsShelterRepository);
+    }
 
     @Test
     void save() {
-        ContactsForCatsShelterService contactsForCatsShelterService = new ContactsForCatsShelterService(userService, contactsForCatsShelterRepository);
+        when(userService.getUserIdByChatId(chatId)).thenReturn(userId);
+        when(userService.getUserNameByChatId(chatId)).thenReturn(name);
 
-        when(userService.getUserIdByChatId(3333L)).thenReturn(333L);
-        when(userService.getUserNameByChatId(3333L)).thenReturn("Sam");
-
-        contactsForCatsShelterService.save(3333L, "33333");
+        contactsForCatsShelterService.save(chatId, userContact);
 
         verify(contactsForCatsShelterRepository).save(contact);
     }
 
     @Test
     void getAll() {
-        ContactsForCatsShelterService contactsForCatsShelterService = new ContactsForCatsShelterService(userService, contactsForCatsShelterRepository);
         List<ContactsForCatsShelter> contactsForCatsShelters = new ArrayList<>();
         contactsForCatsShelters.add(contact);
 
@@ -56,7 +63,6 @@ public class ContactsForCatsShelterServiceTest {
 
     @Test
     void deleteAll(){
-        ContactsForCatsShelterService contactsForCatsShelterService = new ContactsForCatsShelterService(userService, contactsForCatsShelterRepository);
         List<ContactsForCatsShelter> contactsForCatsShelters = new ArrayList<>();
         contactsForCatsShelters.add(contact);
 

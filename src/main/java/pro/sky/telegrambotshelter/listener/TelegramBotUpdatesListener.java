@@ -343,13 +343,13 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 messageString = shelterService.getHomeRecommendationsOld(shelterChoiceString);
                 break;
             case "st2_home_recommendations_disability":
-                messageString = "Disability button pressed";
+                messageString = shelterService.getDisabilityRecommendations(shelterChoiceString);
                 break;
             case "st2_cynologist_recommendations":
                 messageString = shelterService.getCynologistRecommendations(shelterChoiceString);
                 break;
             case "st2_list_of_cynologists":
-                messageString = "List of cynologists button pressed";
+                messageString = shelterService.getListOfCynologists(shelterChoiceString);
                 break;
             case "st2_why_we_can_deny":
                 messageString = shelterService.getWhyWeCanDeny(shelterChoiceString);

@@ -2,6 +2,7 @@ package pro.sky.telegrambotshelter.service;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import org.webjars.NotFoundException;
 import pro.sky.telegrambotshelter.model.User;
 import pro.sky.telegrambotshelter.repository.UserRepository;
 
@@ -26,7 +27,7 @@ public class UserService {
     }
 
     /**
-     * метод для изменения пользователя в БД
+     * метод для изменения выбора пользователя в БД
      */
     public void updateShelterChoiceByChatId(User user, String shelterTypeChoice) {
         Optional<User> optUser = userRepository.findUserByChatId(user.getChatId());
@@ -34,6 +35,47 @@ public class UserService {
         tmpUser = optUser.orElse(user);
         tmpUser.setShelterTypeChoice(shelterTypeChoice);
         userRepository.save(tmpUser);
+    }
+
+    /**
+     * метод для создания пользователя
+     */
+    public User createUser(User user) {
+        return userRepository.save(user);
+    }
+
+
+    /**
+     * метод для обновления пользователя
+     */
+    public Optional<User> updateUser(User user) {
+        if (userRepository.existsById(user.getId()))
+            return Optional.of(userRepository.save(user));
+        return Optional.empty();
+    }
+
+    /**
+     * метод для получения всех пользователей
+     */
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    /**
+     * метод для получения всех пользователей по типу приюта
+     */
+    public List<User> getAllUsersByShelterTypeChoice(String choice) {
+        return userRepository.findAllByShelterTypeChoice(choice);
+    }
+
+
+    /**
+     * метод удаления Пользователя по id
+     */
+    public void deleteUserById(Long id){
+        if(!userRepository.existsById(id))
+            throw new NotFoundException("Pet id not found");
+        userRepository.deleteById(id);
     }
 
     /**
@@ -75,9 +117,11 @@ public class UserService {
         return getContacts(usersId);
     }
 
-    /** Метод удаления из таблицы users по chat_iD */
-    public void deleteUsersByChatId(Long chatId){
-        Optional<User> optUser =  userRepository.findUserByChatId(chatId);
+    /**
+     * Метод удаления из таблицы users по chat_iD
+     */
+    public void deleteUsersByChatId(Long chatId) {
+        Optional<User> optUser = userRepository.findUserByChatId(chatId);
         optUser.ifPresent(userRepository::delete);
     }
 
@@ -96,20 +140,5 @@ public class UserService {
         return contactsFromCats;
     }
 
-    /**
-     * получение всех пользователей в мапу (Id пользователя - пользователь)
-     * */
-    public Map<Long, User> getAllByIdNameMap() {
-
-        List<User> userList = userRepository.findAll();
-        Map<Long, User> usersIdNameMap = new HashMap<>();
-
-        for (User user: userList) {
-            usersIdNameMap.put(user.getId(), user);
-        }
-
-        return usersIdNameMap;
-
-    }
 
 }

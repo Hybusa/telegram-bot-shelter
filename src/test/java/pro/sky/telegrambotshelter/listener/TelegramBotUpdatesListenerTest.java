@@ -48,14 +48,19 @@ class TelegramBotUpdatesListenerTest {
 
 
     Map<Long, String> userMap = new HashMap<>();
+
+    List<Update> updates;
     String name = "Jane";
     Long chatId = 123L;
+
+    int messageId = 223;
 
     @BeforeEach
     void init() {
         userMap.put(chatId, "TestString");
         when(userService.getMapUsersChatIdWithChoice()).thenReturn(userMap);
         telegramBotUpdatesListener.init();
+        updates = new ArrayList<>();
     }
 
     /**
@@ -64,7 +69,7 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStartNewUser() {
         // Arrange
-        List<Update> updates = new ArrayList<>();
+
 
         String messageText = "/start";
         String returnMessageText = "Hello, " + name + "! \n" + botInfo;
@@ -113,10 +118,6 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStartRecurringUser() {
         // Arrange
-        List<Update> updates = new ArrayList<>();
-        String name = "Jane";
-        Long chatId = 123L;
-
         String messageText = "/start";
 
         Chat chat = mock(Chat.class);
@@ -160,9 +161,8 @@ class TelegramBotUpdatesListenerTest {
     void testProcessStage0DogsCommand() {
         // Arrange
         List<Update> updates = new ArrayList<>();
-        String name = "Jane";
         Long chatId = 123L;
-        int messageId = 223;
+
 
         String messageText = "st0_dog_shelters";
 
@@ -211,7 +211,6 @@ class TelegramBotUpdatesListenerTest {
     void testProcessStage0CatsCommand() {
         // Arrange
         List<Update> updates = new ArrayList<>();
-        String name = "Jane";
         Long chatId = 123L;
         int messageId = 223;
 
@@ -262,10 +261,6 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStage1InfoCommand() {
         // Arrange
-        List<Update> updates = new ArrayList<>();
-        Long chatId = 123L;
-        int messageId = 223;
-
         String messageText = "st1_shelter_info";
 
         User user = mock(User.class);
@@ -303,10 +298,6 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStage1ScheduleCommand() {
         // Arrange
-        List<Update> updates = new ArrayList<>();
-        Long chatId = 123L;
-        int messageId = 223;
-
         String messageText = "st1_shelter_schedule";
 
         User user = mock(User.class);
@@ -343,10 +334,6 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStage1AddressCommand() {
         // Arrange
-        List<Update> updates = new ArrayList<>();
-        Long chatId = 123L;
-        int messageId = 223;
-
         String messageText = "st1_shelter_address";
 
         User user = mock(User.class);
@@ -384,10 +371,6 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStage1PathCommand() {
         // Arrange
-        List<Update> updates = new ArrayList<>();
-        Long chatId = 123L;
-        int messageId = 223;
-
         String messageText = "st1_shelter_path";
 
         User user = mock(User.class);
@@ -425,10 +408,6 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStage1PathSecurityPass() {
         // Arrange
-        List<Update> updates = new ArrayList<>();
-        Long chatId = 123L;
-        int messageId = 223;
-
         String messageText = "st1_shelter_security_pass";
 
         User user = mock(User.class);
@@ -465,10 +444,6 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStage1SafetyRequirements() {
         // Arrange
-        List<Update> updates = new ArrayList<>();
-        Long chatId = 123L;
-        int messageId = 223;
-
         String messageText = "st1_shelter_safety_requirements";
 
         User user = mock(User.class);
@@ -506,10 +481,6 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStage1CallAVolunteer() {
         // Arrange
-        List<Update> updates = new ArrayList<>();
-        Long chatId = 123L;
-        int messageId = 223;
-
         String messageText = "st1_call_a_volunteer";
 
         User user = mock(User.class);
@@ -553,10 +524,6 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStage1ContactReceiving() {
         // Arrange
-        List<Update> updates = new ArrayList<>();
-        Long chatId = 123L;
-        int messageId = 223;
-
         String messageText = "st1_contact_receiving";
 
         User user = mock(User.class);
@@ -600,10 +567,6 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStage2MeetingRecommendations() {
         // Arrange
-        List<Update> updates = new ArrayList<>();
-        Long chatId = 123L;
-        int messageId = 223;
-
         String messageText = "st2_meeting_recommendations";
 
         User user = mock(User.class);
@@ -640,10 +603,6 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStage2DocumentList() {
         // Arrange
-        List<Update> updates = new ArrayList<>();
-        Long chatId = 123L;
-        int messageId = 223;
-
         String messageText = "st2_document_list";
 
         User user = mock(User.class);
@@ -680,10 +639,6 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStage2HomeRecommendationsYoung() {
         // Arrange
-        List<Update> updates = new ArrayList<>();
-        Long chatId = 123L;
-        int messageId = 223;
-
         String messageText = "st2_home_recommendations_young";
 
         User user = mock(User.class);
@@ -720,10 +675,6 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStage2HomeRecommendationsOld() {
         // Arrange
-        List<Update> updates = new ArrayList<>();
-        Long chatId = 123L;
-        int messageId = 223;
-
         String messageText = "st2_home_recommendations_old";
 
         User user = mock(User.class);
@@ -800,10 +751,6 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStage2CynologistRecommendations() {
         // Arrange
-        List<Update> updates = new ArrayList<>();
-        Long chatId = 123L;
-        int messageId = 223;
-
         String messageText = "st2_cynologist_recommendations";
 
         User user = mock(User.class);
@@ -841,10 +788,6 @@ class TelegramBotUpdatesListenerTest {
     @Disabled
     void testProcessStage2ListOfCynologists() {
         // Arrange
-        List<Update> updates = new ArrayList<>();
-        Long chatId = 123L;
-        int messageId = 223;
-
         String messageText = "st2_list_of_cynologists";
 
         User user = mock(User.class);
@@ -874,18 +817,12 @@ class TelegramBotUpdatesListenerTest {
         verify(user, atLeastOnce()).id();
         //verify(shelterService).(anyString());
     }
-
     /**
      * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
-    @Disabled
     void testProcessStage2WhyWeCanDeny() {
         // Arrange
-        List<Update> updates = new ArrayList<>();
-        Long chatId = 123L;
-        int messageId = 223;
-
         String messageText = "st2_why_we_can_deny";
 
         User user = mock(User.class);
@@ -921,10 +858,6 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStage2CallAVolunteer() {
         // Arrange
-        List<Update> updates = new ArrayList<>();
-        Long chatId = 123L;
-        int messageId = 223;
-
         String messageText = "st2_call_a_volunteer";
 
         User user = mock(User.class);
@@ -967,10 +900,6 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStage2ContactReceiving() {
         // Arrange
-        List<Update> updates = new ArrayList<>();
-        Long chatId = 123L;
-        int messageId = 223;
-
         String messageText = "st2_contact_receiving";
 
         User user = mock(User.class);

@@ -1,5 +1,6 @@
 package pro.sky.telegrambotshelter.services;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -8,6 +9,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import pro.sky.telegrambotshelter.model.Shelter;
 import pro.sky.telegrambotshelter.repository.ShelterRepository;
 import pro.sky.telegrambotshelter.service.ShelterService;
+import pro.sky.telegrambotshelter.service.UserService;
 
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,13 +22,17 @@ public class ShelterServiceTest {
     @MockBean
     private ShelterRepository shelterRepository;
 
-    private final Shelter shelter = new Shelter(111, "cats", "q", "p", "w", "q", "p","w", "q", "p","w", "q", "p","w", "q", "p","w", "q", "p");
+    private final Shelter shelter = new Shelter(111, "cats", "q", "p", "w", "q", "p", "w", "q", "p", "w", "q", "p", "w", "q", "p", "w", "q", "p");
 
+    private ShelterService shelterService;
+
+    @BeforeEach
+    public void initEach() {
+        shelterService = new ShelterService(shelterRepository);
+    }
 
     @Test
-    void getVolunteerChatId(){
-        ShelterService shelterService = new ShelterService(shelterRepository);
-
+    void getVolunteerChatId() {
         when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
 
         int actual = shelterService.getVolunteerChatId(shelter.getShelterType());
@@ -34,9 +40,7 @@ public class ShelterServiceTest {
     }
 
     @Test
-    void getMeetingRecommendation(){
-        ShelterService shelterService = new ShelterService(shelterRepository);
-
+    void getMeetingRecommendation() {
         when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
 
         String actual = shelterService.getMeetingRecommendation(shelter.getShelterType());
@@ -44,9 +48,7 @@ public class ShelterServiceTest {
     }
 
     @Test
-    void getHowToGetPet(){
-        ShelterService shelterService = new ShelterService(shelterRepository);
-
+    void getHowToGetPet() {
         when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
 
         String actual = shelterService.getHowToGetPet(shelter.getShelterType());
@@ -54,9 +56,7 @@ public class ShelterServiceTest {
     }
 
     @Test
-    void getDocumentsList(){
-        ShelterService shelterService = new ShelterService(shelterRepository);
-
+    void getDocumentsList() {
         when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
 
         String actual = shelterService.getDocumentsList(shelter.getShelterType());
@@ -64,9 +64,7 @@ public class ShelterServiceTest {
     }
 
     @Test
-    void getGeneralInfo(){
-        ShelterService shelterService = new ShelterService(shelterRepository);
-
+    void getGeneralInfo() {
         when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
 
         String actual = shelterService.getGeneralInfo(shelter.getShelterType());
@@ -74,9 +72,7 @@ public class ShelterServiceTest {
     }
 
     @Test
-    void getPhoneNumber(){
-        ShelterService shelterService = new ShelterService(shelterRepository);
-
+    void getPhoneNumber() {
         when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
 
         String actual = shelterService.getPhoneNumber(shelter.getShelterType());
@@ -84,9 +80,7 @@ public class ShelterServiceTest {
     }
 
     @Test
-    void getSchedule(){
-        ShelterService shelterService = new ShelterService(shelterRepository);
-
+    void getSchedule() {
         when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
 
         String actual = shelterService.getSchedule(shelter.getShelterType());
@@ -94,9 +88,7 @@ public class ShelterServiceTest {
     }
 
     @Test
-    void getAddress(){
-        ShelterService shelterService = new ShelterService(shelterRepository);
-
+    void getAddress() {
         when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
 
         String actual = shelterService.getAddress(shelter.getShelterType());
@@ -104,9 +96,7 @@ public class ShelterServiceTest {
     }
 
     @Test
-    void getHowToGet(){
-        ShelterService shelterService = new ShelterService(shelterRepository);
-
+    void getHowToGet() {
         when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
 
         String actual = shelterService.getHowToGet(shelter.getShelterType());
@@ -114,9 +104,7 @@ public class ShelterServiceTest {
     }
 
     @Test
-    void getSecurityAndPass(){
-        ShelterService shelterService = new ShelterService(shelterRepository);
-
+    void getSecurityAndPass() {
         when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
 
         String actual = shelterService.getSecurityAndPass(shelter.getShelterType());
@@ -124,9 +112,7 @@ public class ShelterServiceTest {
     }
 
     @Test
-    void getSafety(){
-        ShelterService shelterService = new ShelterService(shelterRepository);
-
+    void getSafety() {
         when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
 
         String actual = shelterService.getSafety(shelter.getShelterType());
@@ -134,9 +120,7 @@ public class ShelterServiceTest {
     }
 
     @Test
-    void getTransportingRecommendations(){
-        ShelterService shelterService = new ShelterService(shelterRepository);
-
+    void getTransportingRecommendations() {
         when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
 
         String actual = shelterService.getTransportingRecommendations(shelter.getShelterType());
@@ -144,9 +128,7 @@ public class ShelterServiceTest {
     }
 
     @Test
-    void getHomeRecommendationsYoung(){
-        ShelterService shelterService = new ShelterService(shelterRepository);
-
+    void getHomeRecommendationsYoung() {
         when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
 
         String actual = shelterService.getHomeRecommendationsYoung(shelter.getShelterType());
@@ -154,9 +136,7 @@ public class ShelterServiceTest {
     }
 
     @Test
-    void getHomeRecommendationsOld(){
-        ShelterService shelterService = new ShelterService(shelterRepository);
-
+    void getHomeRecommendationsOld() {
         when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
 
         String actual = shelterService.getHomeRecommendationsOld(shelter.getShelterType());
@@ -164,9 +144,7 @@ public class ShelterServiceTest {
     }
 
     @Test
-    void getCynologistRecommendations(){
-        ShelterService shelterService = new ShelterService(shelterRepository);
-
+    void getCynologistRecommendations() {
         when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
 
         String actual = shelterService.getCynologistRecommendations(shelter.getShelterType());
@@ -174,12 +152,26 @@ public class ShelterServiceTest {
     }
 
     @Test
-    void getWhyWeCanDeny(){
-        ShelterService shelterService = new ShelterService(shelterRepository);
-
+    void getWhyWeCanDeny() {
         when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
 
         String actual = shelterService.getWhyWeCanDeny(shelter.getShelterType());
         assertEquals(shelter.getWhyWeCanDeny(), actual);
+    }
+
+    @Test
+    void getDisabilityRecommendations() {
+        when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
+
+        String actual = shelterService.getDisabilityRecommendations(shelter.getShelterType());
+        assertEquals(shelter.getDisabilityRecommendations(), actual);
+    }
+
+    @Test
+    void getListOfCynologists() {
+        when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
+
+        String actual = shelterService.getListOfCynologists(shelter.getShelterType());
+        assertEquals(shelter.getListOfCynologists(), actual);
     }
 }

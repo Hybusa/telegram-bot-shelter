@@ -61,10 +61,7 @@ public class ContactsForDogsShelter {
 
     @Override
     public String toString() {
-        return "ContactsForDogsShelter{" +
-                "user_id=" + user_id +
-                ", name='" + name + '\'' +
-                ", contact='" + contact + '\'' +
-                '}';
+        return "name=" + name +
+                ", contact=" + contact + " \n";
     }
 }

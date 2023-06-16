@@ -2,9 +2,12 @@ package pro.sky.telegrambotshelter.scheduler;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.response.BaseResponse;
 import com.pengrad.telegrambot.response.SendResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -16,12 +19,14 @@ import pro.sky.telegrambotshelter.service.ShelterService;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {ContactScheduler.class})
 @ExtendWith(SpringExtension.class)
 public class ContactSchedulerTest {
+
+    @Autowired
+    private ContactScheduler contactScheduler;
     @MockBean
     private TelegramBot telegramBot;
     @MockBean
@@ -31,22 +36,22 @@ public class ContactSchedulerTest {
     @MockBean
     private ContactsForDogsShelterService contactsForDogsShelterService;
 
-    /*@Test
+    /* @Test
     void checkerForCatShelter() {
-        int volunteerChatId = 333;
-        List<ContactsForCatsShelter> contactsForCat = new ArrayList<>();
-        ContactsForCatsShelter contact = new ContactsForCatsShelter(333L, "Sam", "33333");
-        contactsForCat.add(contact);
-        ContactScheduler contactScheduler = new ContactScheduler(telegramBot, shelterService, contactsForCatsShelterService, contactsForDogsShelterService);
-        SendResponse sendResponse = telegramBot.execute((new SendMessage(volunteerChatId, contactsForCat.toString())));
-
+        List<ContactsForCatsShelter> contactsForCatsShelters = new ArrayList<>();
+        ContactsForCatsShelter contacts = new ContactsForCatsShelter(333L, "Sam", "3333");
+        contactsForCatsShelters.add(contacts);
 
         when(shelterService.getVolunteerChatId("cats")).thenReturn(333);
-        when(contactsForCatsShelterService.getAll()).thenReturn(contactsForCat);
-        when(telegramBot.execute((new SendMessage(volunteerChatId, contactsForCat.toString())))).thenReturn(sendResponse.isOk())
+        when(contactsForCatsShelterService.getAll()).thenReturn(contactsForCatsShelters);
+        SendResponse sendResponse = mock(SendResponse.class);
+        when(sendResponse.isOk()).thenReturn(true);
+        when(telegramBot.execute(any(SendMessage.class))).thenReturn(sendResponse);
 
-        verify(telegramBot).execute((new SendMessage(volunteerChatId, contactsForCat.toString())));
-    }
-    */
-    }
+        verify(telegramBot).execute(Mockito.any(SendMessage.class));
+        verify(sendResponse).isOk();
+        verify(contactsForCatsShelterService).deleteAll(contactsForCatsShelters);
+    }*/
+
+}
 

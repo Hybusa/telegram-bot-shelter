@@ -2,15 +2,16 @@ package pro.sky.telegrambotshelter.model;
 
 import com.pengrad.telegrambot.model.PhotoSize;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Iterator;
 
 public class Report {
 
     private Long chatId;
     private int messageId;
-
-    private LocalDateTime addedDate;
+    String fullName;
+    String userName;
     private boolean isActive;
     private String diet;
     private String health;
@@ -18,6 +19,21 @@ public class Report {
     private String changes;
 
     List<PhotoSize> photos;
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
 
     public List<PhotoSize> getPhotos() {
         return photos;
@@ -33,14 +49,6 @@ public class Report {
 
     public void setChatId(Long chatId) {
         this.chatId = chatId;
-    }
-
-    public LocalDateTime getAddedDate() {
-        return addedDate;
-    }
-
-    public void setAddedDate(LocalDateTime addedDate) {
-        this.addedDate = addedDate;
     }
 
     public boolean isActive() {
@@ -112,7 +120,17 @@ public class Report {
         return "Health:" + "\n" + health +
                 "\nDiet:" + "\n" + diet +
                 "\nAdaptation:" + "\n" + adaptation +
-                "\n Changes" + "\n" + changes;
+                "\n Changes:" + "\n" + changes;
+    }
+    public String doFullTextReport() {
+        return "Report from:" + "\n" + fullName +
+                "\nUsername: " + userName +
+                "\nChatId: " + chatId +
+                "\n" +
+                "\nHealth:" + "\n" + health +
+                "\nDiet:" + "\n" + diet +
+                "\nAdaptation:" + "\n" + adaptation +
+                "\n Changes:" + "\n" + changes;
     }
     public int getMessageId() {
         return messageId;
@@ -127,6 +145,11 @@ public class Report {
         diet = null;
         adaptation = null;
         changes = null;
-        photos.clear();
+        userName = null;
+        fullName = null;
+        chatId = 0L;
+        messageId = 0;
+
+        photos = new ArrayList<PhotoSize>();
     }
 }

@@ -52,7 +52,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private final Report currentReport = new Report();
     private final String VOLUNTEER_NAME = "VOLONTEER_PLACEHOLDER";
     private final String VOLUNTEER_PHONE_NUMBER = "+00000000000";
-    private final Long VOLUNTEER_CHAT_ID = 213L;//todo поменять id
+    private final Long VOLUNTEER_CHAT_ID = 123L;//todo поменять либо брать из базы или хардкод сделать
 
     public TelegramBotUpdatesListener(TelegramBot telegramBot, ShelterService shelterService, UserService userService) {
         this.telegramBot = telegramBot;
@@ -134,26 +134,33 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         Long chatId = update.callbackQuery().from().id();
         String messageString = "";
 
+        boolean isFinishReport = false;
         switch (update.callbackQuery().data()) {
-            case  "st3_send_report_master":
-                sendMessage(chatId, "Placeholder for 'Send report'");
+            case  "st3_fill_report_master":
+                sendMessage(chatId, "report in progress...");
                 createReport(chatId);
                 break;
 
             case "st3_send_report":
                 sendReportVolunteer();
+                isFinishReport = true;
                 break;
             case "st3_cancel":
                 currentReport.setNullFields();
                 messageString = "Report canceled";
+                isFinishReport = true;
                 break;
             default:
                 messageString = "smth went wrong";
+                isFinishReport = true;
         }
         if(!messageString.isEmpty())
             sendMessage(chatId, messageString);
-        telegramBot.execute(new SendMessage(chatId, "Please, choose an option from the menu")
-                .replyMarkup(STANDARD_KEYBOARD_MARKUP));
+
+        if (isFinishReport) {
+            telegramBot.execute(new SendMessage(chatId, "Please, choose an option from the menu")
+                    .replyMarkup(STANDARD_KEYBOARD_MARKUP));
+        }
      }
 
     /**
@@ -271,10 +278,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 break;
             case "Send report":
                 inlineKeyboardMarkup = new InlineKeyboardMarkup(
-                        new InlineKeyboardButton("Everything is right. SendReport")
-                                .callbackData("st3_send_report_master")
+                        new InlineKeyboardButton("Fill report")
+                                .callbackData("st3_fill_report_master")
                 );
-                choiceMessage(update.message().chat().id(), "REPORT",inlineKeyboardMarkup);
+                choiceMessage(update.message().chat().id(), "Let's start to fill a report",inlineKeyboardMarkup);
                 break;
             case "Call a volunteer":
                 SendContact sendContact = new SendContact(chatId, VOLUNTEER_PHONE_NUMBER, VOLUNTEER_NAME).vcard("Волонтёр приюта Александр")

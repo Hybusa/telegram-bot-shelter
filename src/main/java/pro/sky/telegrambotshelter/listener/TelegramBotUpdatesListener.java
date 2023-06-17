@@ -135,6 +135,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         String messageString = "";
 
         switch (update.callbackQuery().data()) {
+            case  "st3_send_report_master":
+                sendMessage(chatId, "Placeholder for 'Send report'");
+                createReport(chatId);
+                break;
+
             case "st3_send_report":
                 sendReportVolunteer();
                 break;
@@ -267,7 +272,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             case "Send report":
                 inlineKeyboardMarkup = new InlineKeyboardMarkup(
                         new InlineKeyboardButton("Everything is right. SendReport")
-                                .callbackData("st3_send_report")
+                                .callbackData("st3_send_report_master")
                 );
                 choiceMessage(update.message().chat().id(), "REPORT",inlineKeyboardMarkup);
                 break;

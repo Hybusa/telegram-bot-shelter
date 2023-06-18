@@ -3,11 +3,13 @@ package pro.sky.telegrambotshelter.service;
 import liquibase.pro.packaged.S;
 import org.springframework.stereotype.Service;
 import pro.sky.telegrambotshelter.model.Shelter;
+import pro.sky.telegrambotshelter.model.User;
 import pro.sky.telegrambotshelter.repository.ShelterRepository;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**сервис для работы с БД приютов*/
 @Service
@@ -114,5 +116,45 @@ public class ShelterService {
 
     }
 
+    /**
+     * добавление пользователя в приют
+     */
+    public void addUserToShelter (User user) {
+
+        Optional<Shelter> shelter = shelterRepository.findById(user.getShelter().getId());
+
+        shelter.ifPresent(entity -> {
+
+            List<User> usersList = entity.getUsers();
+
+            usersList.add(user);
+            entity.setUsers(usersList);
+
+            shelterRepository.save(entity);
+
+        });
+
+    }
+
+    /**
+     * удаление пользователя из приюта
+     */
+
+    public void deleteUserFromShelter(User user) {
+
+        Optional<Shelter> shelter = shelterRepository.findById(user.getShelter().getId());
+
+        shelter.ifPresent(entity -> {
+
+            List<User> usersList = entity.getUsers();
+
+            usersList.remove(user);
+            entity.setUsers(usersList);
+
+            shelterRepository.save(entity);
+
+        });
+
+    }
 
 }

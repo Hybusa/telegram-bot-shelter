@@ -2,6 +2,7 @@ package pro.sky.telegrambotshelter.model;
 
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -50,6 +51,8 @@ public class Shelter {
 
     private String whyWeCanDeny;
 
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "shelter")
+    private List<User> users;
 
     public Shelter() {
     }
@@ -252,6 +255,14 @@ public class Shelter {
 
     public void setWhyWeCanDeny(String whyWeCanDeny) {
         this.whyWeCanDeny = whyWeCanDeny;
+    }
+
+    public List<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<User> users) {
+        this.users = users;
     }
 
     @Override

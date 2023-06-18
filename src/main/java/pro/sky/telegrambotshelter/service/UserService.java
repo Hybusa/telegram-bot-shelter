@@ -26,13 +26,24 @@ public class UserService {
     }
 
     /**
-     * метод для изменения пользователя в БД
+     * метод для изменения типа приюта пользователя в БД
      */
     public void updateShelterChoiceByChatId(User user, String shelterTypeChoice) {
         Optional<User> optUser = userRepository.findUserByChatId(user.getChatId());
         User tmpUser;
         tmpUser = optUser.orElse(user);
         tmpUser.setShelterTypeChoice(shelterTypeChoice);
+        userRepository.save(tmpUser);
+    }
+
+    /**
+     * метод для добавления контактов пользователя в БД
+     */
+    public void saveContacts(User user, String contact) {
+        Optional<User> optUser = userRepository.findUserByChatId(user.getChatId());
+        User tmpUser;
+        tmpUser = optUser.orElse(user);
+        tmpUser.setContact(contact);
         userRepository.save(tmpUser);
     }
 
@@ -50,6 +61,14 @@ public class UserService {
         return usersId;
     }
 
+    public Long getUserIdByChatId(Long chatId){
+       return userRepository.findUserByChatId(chatId).get().getId();
+    }
+
+    public String getUserNameByChatId(Long chatId){
+        return userRepository.findUserByChatId(chatId).get().getName();
+    }
+
     /**
      * метод для получения пользователя по id
      */
@@ -57,22 +76,12 @@ public class UserService {
         return userRepository.findById(id);
     }
 
-    /**
-     * метод для получения list с контактами пользователей приюта для собак
-     */
-    public List<String> getListUsersContactsWithDodShelter() {
-        List<Long> usersId = new ArrayList<>(userRepository.listUsersIdFromDogsShelter());
-
-        return getContacts(usersId);
-    }
 
     /**
-     * метод для получения list с контактами пользователей приюта для кошек
+     * метод для получения типа приюта пользователя
      */
-    public List<String> getListUsersContactsWithCatShelter() {
-        List<Long> usersId = new ArrayList<>(userRepository.listUsersIdFromCatsShelter());
-
-        return getContacts(usersId);
+    public String getUsersShelterTypeChoice(Long chatId){
+        return userRepository.findUserByChatId(chatId).get().getShelterTypeChoice();
     }
 
     /** Метод удаления из таблицы users по chat_iD */
@@ -96,6 +105,11 @@ public class UserService {
         return contactsFromCats;
     }
 
-
-
+    /**
+     * метод для получения контакта пользователя
+     */
+    public String getContact(Long chatId) {
+        Optional<User> optUser = userRepository.findUserByChatId(chatId);
+        return optUser.get().getContact();
+    }
 }

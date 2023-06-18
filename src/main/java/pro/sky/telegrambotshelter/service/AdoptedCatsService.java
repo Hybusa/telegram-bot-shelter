@@ -33,7 +33,6 @@ public class AdoptedCatsService {
         adoptedCatsRepository.save(adoptedCats);
     }
 
-
     /**
      * редактирование последней даты очета AdoptedCats
      */

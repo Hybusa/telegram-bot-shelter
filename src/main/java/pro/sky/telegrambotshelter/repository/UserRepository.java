@@ -8,17 +8,24 @@ import pro.sky.telegrambotshelter.model.User;
 import java.util.List;
 import java.util.Optional;
 
-/**репозиторий для работы с БД пользователей*/
+/**
+ * репозиторий для работы с БД пользователей
+ */
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    /**метод для поиска пользователя по chat_id*/
+    /**
+     * метод для поиска пользователя по chat_id
+     */
     Optional<User> findUserByChatId(Long id);
 
     List<User> findAllByShelterTypeChoice(String choice);
 
 
-    /**список chat_id пользователей*/
+
+    /**
+     * список chat_id пользователей
+     */
     @Query(value = "SELECT chat_id FROM users", nativeQuery = true)
     List<Long> listChatIdUsers();
 
@@ -31,7 +38,4 @@ public interface UserRepository extends JpaRepository<User, Long> {
     /**список id пользователей приюта для кошек*/
     @Query(value = "SELECT DISTINCT user_id FROM user_shelter_join WHERE shelter_id = 1", nativeQuery = true)
     List<Long> listUsersIdFromCatsShelter();
-
-    List<User> findUserByShelterTypeChoice(String shelterType);
-
 }

@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import pro.sky.telegrambotshelter.service.ContactsForCatsShelterService;
+import pro.sky.telegrambotshelter.service.ContactsForDogsShelterService;
 import pro.sky.telegrambotshelter.service.ShelterService;
 import pro.sky.telegrambotshelter.service.UserService;
 
@@ -42,6 +44,12 @@ class TelegramBotUpdatesListenerTest {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private ContactsForCatsShelterService contactsForCatsShelterService;
+
+    @MockBean
+    private ContactsForDogsShelterService contactsForDogsShelterService;
 
     @Value("${telegram.bot.info}")
     String botInfo;

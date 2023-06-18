@@ -4,6 +4,8 @@ import liquibase.pro.packaged.S;
 import org.springframework.stereotype.Service;
 import pro.sky.telegrambotshelter.model.Shelter;
 import pro.sky.telegrambotshelter.model.User;
+import org.webjars.NotFoundException;
+import pro.sky.telegrambotshelter.model.Shelter;
 import pro.sky.telegrambotshelter.repository.ShelterRepository;
 
 import java.util.HashMap;
@@ -11,13 +13,51 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import java.util.List;
+import java.util.Optional;
+
 /**сервис для работы с БД приютов*/
 @Service
 public class ShelterService {
     private final ShelterRepository shelterRepository;
 
+
     public ShelterService(ShelterRepository shelterRepository) {
         this.shelterRepository = shelterRepository;
+    }
+
+    /**метод для создания нового приюта*/
+    public Shelter createShelter(Shelter shelter){
+        return shelterRepository.save(shelter);
+    }
+
+    /**метод для получения всех приютов*/
+    public List<Shelter> getAllShelters() {
+        return shelterRepository.findAll();
+    }
+
+    /**метод для получения всех приютов по типу*/
+    public List<Shelter> getAllByShelterType(String shelterType){
+        return shelterRepository.findAllByShelterType(shelterType);
+    }
+
+    /**метод для получения приюта по id*/
+    public Optional<Shelter> getShelterById(Long id){
+        return shelterRepository.findById(id);
+    }
+
+    /**метод для родактирования приюта*/
+    public Optional<Shelter> updateShelter(Shelter shelter) {
+        if(shelterRepository.existsById(shelter.getId()))
+            return Optional.of(shelterRepository.save(shelter));
+        return Optional.empty();
+    }
+
+    /**метод для удаления приюта*/
+    public void deleteShelter(Long id){
+        if(!shelterRepository.existsById(id))
+            throw new NotFoundException("Shelter id not found");
+        shelterRepository.deleteById(id);
     }
 
     /**метод для получения id волонтера*/

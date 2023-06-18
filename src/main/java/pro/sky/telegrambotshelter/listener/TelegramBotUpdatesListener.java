@@ -18,6 +18,8 @@ import pro.sky.telegrambotshelter.model.Report;
 import pro.sky.telegrambotshelter.enums.ButtonCommands;
 import pro.sky.telegrambotshelter.enums.Phrases;
 import pro.sky.telegrambotshelter.model.User;
+import pro.sky.telegrambotshelter.service.ContactsForCatsShelterService;
+import pro.sky.telegrambotshelter.service.ContactsForDogsShelterService;
 import pro.sky.telegrambotshelter.service.ShelterService;
 import pro.sky.telegrambotshelter.service.UserService;
 
@@ -48,16 +50,20 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private final ShelterService shelterService;
 
     private final UserService userService;
+    private final ContactsForCatsShelterService contactsForCatsShelterService;
+    private final ContactsForDogsShelterService contactsForDogsShelterService;
 
     private final Report currentReport = new Report();
     private final String VOLUNTEER_NAME = "VOLONTEER_PLACEHOLDER";
     private final String VOLUNTEER_PHONE_NUMBER = "+00000000000";
     private final Long VOLUNTEER_CHAT_ID = 123L;//todo поменять либо брать из базы или хардкод сделать
 
-    public TelegramBotUpdatesListener(TelegramBot telegramBot, ShelterService shelterService, UserService userService) {
+    public TelegramBotUpdatesListener(TelegramBot telegramBot, ShelterService shelterService, UserService userService, ContactsForCatsShelterService contactsForCatsShelterService, ContactsForDogsShelterService contactsForDogsShelterService) {
         this.telegramBot = telegramBot;
         this.shelterService = shelterService;
         this.userService = userService;
+        this.contactsForCatsShelterService = contactsForCatsShelterService;
+        this.contactsForDogsShelterService = contactsForDogsShelterService;
     }
 
     /**
@@ -113,7 +119,20 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      * метод для обработки входящих контактов и ответа на это сообщение
      */
     private void contactReceiving(Update update) {
-        //TODO Saving contact data to the DBs
+
+        long chatId = update.message().chat().id();
+        String messageText = update.message().text();
+        String shelterTypeChoice = userService.getUsersShelterTypeChoice(chatId);
+
+        //метод для сохранения контакта в юзера
+        userService.saveContacts(new User(update.callbackQuery().from().firstName(), chatId), messageText);
+
+        //сохранение контактов в таблицу для контактов приюта собак или кошек
+        if (shelterTypeChoice.equals("cats")) {
+            contactsForCatsShelterService.save(chatId, messageText);
+        } else if (shelterTypeChoice.equals("dogs")) {
+            contactsForDogsShelterService.save(chatId, messageText);
+        }
 
         SendMessage contactReceivingResponse = new SendMessage(update.message().from().id(),
                 Phrases.CONTACT_RECEIVED.toString())
@@ -130,6 +149,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     /**
      * Stage3 обработка реакции пользователя после сформированного им отчета
      */
+
     private void stage3ChoiceUpdateParser(Update update) {
         Long chatId = update.callbackQuery().from().id();
         String messageString = "";
@@ -435,15 +455,13 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 messageString = shelterService.getHomeRecommendationsOld(shelterChoiceString);
                 break;
             case "st2_home_recommendations_disability":
-                //TODO DISABILITY FROM DB
-                messageString = "Disability button pressed";
+                messageString = shelterService.getDisabilityRecommendations(shelterChoiceString);
                 break;
             case "st2_cynologist_recommendations":
                 messageString = shelterService.getCynologistRecommendations(shelterChoiceString);
                 break;
             case "st2_list_of_cynologists":
-                //TODO DB STUFF
-                messageString = "List of cynologists button pressed";
+                messageString = shelterService.getListOfCynologists(shelterChoiceString);
                 break;
             case "st2_why_we_can_deny":
                 messageString = shelterService.getWhyWeCanDeny(shelterChoiceString);

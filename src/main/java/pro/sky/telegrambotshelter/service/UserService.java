@@ -92,6 +92,14 @@ public class UserService {
         return usersId;
     }
 
+    public Long getUserIdByChatId(Long chatId){
+       return userRepository.findUserByChatId(chatId).get().getId();
+    }
+
+    public String getUserNameByChatId(Long chatId){
+        return userRepository.findUserByChatId(chatId).get().getName();
+    }
+
     /**
      * метод для получения пользователя по id
      */
@@ -109,12 +117,10 @@ public class UserService {
     }
 
     /**
-     * метод для получения list с контактами пользователей приюта для кошек
+     * метод для получения типа приюта пользователя
      */
-    public List<String> getListUsersContactsWithCatShelter() {
-        List<Long> usersId = new ArrayList<>(userRepository.listUsersIdFromCatsShelter());
-
-        return getContacts(usersId);
+    public String getUsersShelterTypeChoice(Long chatId){
+        return userRepository.findUserByChatId(chatId).get().getShelterTypeChoice();
     }
 
     /**
@@ -140,5 +146,11 @@ public class UserService {
         return contactsFromCats;
     }
 
-
+    /**
+     * метод для получения контакта пользователя
+     */
+    public String getContact(Long chatId) {
+        Optional<User> optUser = userRepository.findUserByChatId(chatId);
+        return optUser.get().getContact();
+    }
 }

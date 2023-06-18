@@ -29,5 +29,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "SELECT chat_id FROM users", nativeQuery = true)
     List<Long> listChatIdUsers();
 
+    /**список id пользователей приюта для собак*/
+    @Query(value = "SELECT DISTINCT user_id FROM user_shelter_join WHERE shelter_id = 0", nativeQuery = true)
+    List<Long> listUsersIdFromDogsShelter();
+
 
 }

@@ -50,18 +50,20 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private final ShelterService shelterService;
 
     private final UserService userService;
-    private ContactsForCatsShelterService contactsForCatsShelterService;
-    private ContactsForDogsShelterService contactsForDogsShelterService;
+    private final ContactsForCatsShelterService contactsForCatsShelterService;
+    private final ContactsForDogsShelterService contactsForDogsShelterService;
 
     private final Report currentReport = new Report();
     private final String VOLUNTEER_NAME = "VOLONTEER_PLACEHOLDER";
     private final String VOLUNTEER_PHONE_NUMBER = "+00000000000";
     private final Long VOLUNTEER_CHAT_ID = 123L;//todo поменять либо брать из базы или хардкод сделать
 
-    public TelegramBotUpdatesListener(TelegramBot telegramBot, ShelterService shelterService, UserService userService) {
+    public TelegramBotUpdatesListener(TelegramBot telegramBot, ShelterService shelterService, UserService userService, ContactsForCatsShelterService contactsForCatsShelterService, ContactsForDogsShelterService contactsForDogsShelterService) {
         this.telegramBot = telegramBot;
         this.shelterService = shelterService;
         this.userService = userService;
+        this.contactsForCatsShelterService = contactsForCatsShelterService;
+        this.contactsForDogsShelterService = contactsForDogsShelterService;
     }
 
     /**
@@ -131,7 +133,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         } else if (shelterTypeChoice.equals("dogs")) {
             contactsForDogsShelterService.save(chatId, messageText);
         }
-        //TODO Saving contact data to the DBs
 
         SendMessage contactReceivingResponse = new SendMessage(update.message().from().id(),
                 Phrases.CONTACT_RECEIVED.toString())

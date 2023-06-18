@@ -689,8 +689,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             if (response.isOk()) {
                 //информируем пользователя, что ответ отправлен
                 sendMessage(chatId, "Report was send");
-                //обнуляем поля
-                //currentReport.setNullFields();
 
                 //todo Запись даты в базу как последняя отправка
                 //curentReport.getChatId()

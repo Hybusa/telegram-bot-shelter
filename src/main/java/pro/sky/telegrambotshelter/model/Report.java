@@ -8,7 +8,6 @@ import java.util.Iterator;
 
 public class Report {
 
-    private Long chatId;
     private int messageId;
     String fullName;
     String userName;
@@ -42,15 +41,6 @@ public class Report {
     public void setPhotos(List<PhotoSize> photos) {
         this.photos = photos;
     }
-
-    public Long getChatId() {
-        return chatId;
-    }
-
-    public void setChatId(Long chatId) {
-        this.chatId = chatId;
-    }
-
     public boolean isActive() {
         return isActive;
     }
@@ -122,7 +112,7 @@ public class Report {
                 "\nAdaptation:" + "\n" + adaptation +
                 "\n Changes:" + "\n" + changes;
     }
-    public String doFullTextReport() {
+    public String doFullTextReport(Long chatId) {
         return "Report from:" + "\n" + fullName +
                 "\nUsername: " + userName +
                 "\nChatId: " + chatId +
@@ -130,7 +120,7 @@ public class Report {
                 "\nHealth:" + "\n" + health +
                 "\nDiet:" + "\n" + diet +
                 "\nAdaptation:" + "\n" + adaptation +
-                "\n Changes:" + "\n" + changes;
+                "\nChanges:" + "\n" + changes;
     }
     public int getMessageId() {
         return messageId;
@@ -147,7 +137,6 @@ public class Report {
         changes = null;
         userName = null;
         fullName = null;
-        chatId = 0L;
         messageId = 0;
 
         photos = new ArrayList<PhotoSize>();

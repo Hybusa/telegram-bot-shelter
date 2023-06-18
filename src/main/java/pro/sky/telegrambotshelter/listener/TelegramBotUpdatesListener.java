@@ -139,23 +139,22 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
             case "st3_send_report":
                 sendReportVolunteer(chatId);
-                reports.remove(chatId);
                 isFinishReport = true;
                 break;
             case "st3_cancel":
-                reports.remove(chatId);
+
                 messageString = "Report canceled";
                 isFinishReport = true;
                 break;
             default:
                 messageString = "smth went wrong";
-                reports.remove(chatId);
                 isFinishReport = true;
         }
-        if (!messageString.isEmpty())
+        if (!messageString.isEmpty()) {
             sendMessage(chatId, messageString);
-
+        }
         if (isFinishReport) {
+            reports.remove(chatId);
             telegramBot.execute(new SendMessage(chatId, "Please, choose an option from the menu")
                     .replyMarkup(STANDARD_KEYBOARD_MARKUP));
         }
@@ -511,10 +510,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      */
     private void createReport(Long chatId) {
         Report currentReport = reports.get(chatId);
-        if(currentReport == null){
-           currentReport = new Report();
-           reports.put(chatId, currentReport);
+
+        if (currentReport == null) {
+            currentReport = new Report();
+            reports.put(chatId, currentReport);
         }
+
         String message = "Attach a photo";
         SendResponse response = telegramBot.execute(new SendMessage(chatId, message));
         if (response.isOk()) {
@@ -605,11 +606,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                         currentReport.setActive(false);
                         currentReport.setUserName(update.message().from().username());
                         currentReport.setFullName("First name: " + update.message().from().firstName() + ", Last Name: " + update.message().from().lastName());
-                        currentReport.setChatId(chatId);
                         currentReport.nextStep();
 
                         //формируем отчет и отправляем одним сообщением пользователю
-                        sendReportUser(currentReport);
+                        sendReportUser(currentReport, chatId);
                     }
                     break;
                 default:
@@ -624,14 +624,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     /**
      * Метод формирует отчет в одно сообщение и отправляет пользователю для проверки
      */
-    private void sendReportUser(Report currentReport) {
+    private void sendReportUser(Report currentReport, Long chatId) {
 
         if (!currentReport.isActive() || getPicturePhotoSize(currentReport).isPresent()) {
             //получаем фото для отчета
             Optional<PhotoSize> optionalPhotoSize = getPicturePhotoSize(currentReport);
 
             String f_id = optionalPhotoSize.get().fileId();
-            SendPhoto reportMessage = new SendPhoto(currentReport.getChatId(), f_id);
+            SendPhoto reportMessage = new SendPhoto(chatId, f_id);
 
             //добавляем описание к отчету для пользователя
             reportMessage.caption(currentReport.doTextReport());
@@ -640,11 +640,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             //пользователь получил отчет
             if (response.isOk()) {
                 currentReport.setMessageId(response.message().messageId());
-                choiceMessage(currentReport.getChatId(), "It's your report. Choose next step", new InlineKeyboardMarkup(new InlineKeyboardButton("Send").callbackData("st3_send_report"),
+                choiceMessage(chatId, "It's your report. Choose next step", new InlineKeyboardMarkup(new InlineKeyboardButton("Send").callbackData("st3_send_report"),
                         new InlineKeyboardButton("Cancel").callbackData("st3_cancel")));
             }
         } else
-            sendMessage(currentReport.getChatId(), "Report didn't create. Try again");
+            sendMessage(chatId, "Report didn't create. Try again");
     }
 
     /**
@@ -654,7 +654,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
         Report currentReport = reports.get(chatId);
         if (currentReport == null) {
-            sendMessage(chatId, "Sending of report to Volunteer was denied. Try again. Choose option 'Send report'");
+            sendMessage(chatId, "Sending of report to Volunteer was denied. We don't have your report. Try again. Choose option 'Send report' and fill report");
             return;
         }
 
@@ -662,22 +662,25 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             //получаем фото для отчета
             Optional<PhotoSize> optionalPhotoSize = getPicturePhotoSize(currentReport);
             String f_id = optionalPhotoSize.get().fileId();
-            SendPhoto reportMessage = new SendPhoto(shelterService.getVolunteerChatId(shelterChoice.get(currentReport.getChatId())), f_id);
+            SendPhoto reportMessage = new SendPhoto(shelterService.getVolunteerChatId(shelterChoice.get(chatId)), f_id);
 
             //добавляем описание к отчету полное для волонтера
-            reportMessage.caption(currentReport.doFullTextReport());
+            reportMessage.caption(currentReport.doFullTextReport(chatId));
             SendResponse response = telegramBot.execute(reportMessage);
 
-            //информируем пользователя, что ответ отправлен
-            sendMessage(currentReport.getChatId(), "Report was send");
-            //обнуляем поля
-            currentReport.setNullFields();
+            if (response.isOk()) {
+                //информируем пользователя, что ответ отправлен
+                sendMessage(chatId, "Report was send");
+                //обнуляем поля
+                //currentReport.setNullFields();
 
-            //todo Запись даты в базу как последняя отправка
-            //curentReport.getChatId()
-            //LocalDateTime localDateTime = LocalDateTime.now();
+                //todo Запись даты в базу как последняя отправка
+                //curentReport.getChatId()
+                //LocalDateTime localDateTime = LocalDateTime.now();
+            } else
+                sendMessage(chatId, "Report didn't send to Volunteer. Try again");
         } else
-            sendMessage(currentReport.getChatId(), "Report didn't create. Try again");
+            sendMessage(chatId, "Report didn't create. Try again");
     }
 
     /**

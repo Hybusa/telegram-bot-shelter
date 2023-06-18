@@ -1,5 +1,6 @@
 package pro.sky.telegrambotshelter.service;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import pro.sky.telegrambotshelter.model.User;
 import pro.sky.telegrambotshelter.repository.UserRepository;
@@ -83,6 +84,26 @@ public class UserService {
         return userRepository.findUserByChatId(chatId).get().getShelterTypeChoice();
     }
 
+    /** Метод удаления из таблицы users по chat_iD */
+    public void deleteUsersByChatId(Long chatId){
+        Optional<User> optUser =  userRepository.findUserByChatId(chatId);
+        optUser.ifPresent(userRepository::delete);
+    }
+
+    @NotNull
+    private List<String> getContacts(List<Long> usersId) {
+        List<String> contactsFromCats = new ArrayList<>();
+
+        for (Long l : usersId) {
+            Optional<User> optUser = getUserById(l);
+            if (optUser.isPresent()) {
+                String contact = optUser.get().getContact();
+                if (contact != null)
+                    contactsFromCats.add(contact);
+            }
+        }
+        return contactsFromCats;
+    }
 
     /**
      * метод для получения контакта пользователя

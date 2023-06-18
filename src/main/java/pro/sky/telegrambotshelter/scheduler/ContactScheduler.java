@@ -3,6 +3,7 @@ package pro.sky.telegrambotshelter.scheduler;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
+import liquibase.pro.packaged.L;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -37,7 +38,7 @@ public class ContactScheduler {
      @Scheduled(cron = "0 * * * *")
     public void checkerForCatShelter() {
 
-        int volunteerChatIdCatsShelter = shelterService.getVolunteerChatId("Cats");
+        Long volunteerChatIdCatsShelter = shelterService.getVolunteerChatId("Cats");
         List<ContactsForCatsShelter> contactsForCatsShelter = contactsForCatsShelterService.getAll();
 
         if (contactsForCatsShelter == null)
@@ -56,7 +57,7 @@ public class ContactScheduler {
      @Scheduled(cron = "0 * * * *")
     public void checkerForDogShelter() {
 
-        int volunteerChatIdDogsShelter = shelterService.getVolunteerChatId("dogs");
+        Long volunteerChatIdDogsShelter = shelterService.getVolunteerChatId("dogs");
         List<ContactsForDogsShelter> contactsForDogsShelter = contactsForDogsShelterService.getAll();
 
         if (contactsForDogsShelter == null)

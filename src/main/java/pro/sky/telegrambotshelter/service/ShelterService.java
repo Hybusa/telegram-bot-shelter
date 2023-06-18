@@ -17,7 +17,7 @@ public class ShelterService {
     /**
      * метод для получения id волонтера
      */
-    public int getVolunteerChatId(String shelterType) {
+    public Long getVolunteerChatId(String shelterType) {
         return shelterRepository.findShelterByShelterType(shelterType).getVolunteerChatId();
     }
 

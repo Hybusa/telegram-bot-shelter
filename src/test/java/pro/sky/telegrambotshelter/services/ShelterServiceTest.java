@@ -35,7 +35,7 @@ public class ShelterServiceTest {
     void getVolunteerChatId() {
         when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
 
-        int actual = shelterService.getVolunteerChatId(shelter.getShelterType());
+        Long actual = shelterService.getVolunteerChatId(shelter.getShelterType());
         assertEquals(shelter.getVolunteerChatId(), actual);
     }
 

@@ -9,9 +9,9 @@ import java.util.List;
 @Service
 public class ContactsForCatsShelterService {
 
-    private UserService userService;
+    private final UserService userService;
 
-    private ContactsForCatsShelterRepository contactsForCatsShelterRepository;
+    private final ContactsForCatsShelterRepository contactsForCatsShelterRepository;
 
     public ContactsForCatsShelterService(UserService userService, ContactsForCatsShelterRepository contactsForCatsShelterRepository) {
         this.userService = userService;

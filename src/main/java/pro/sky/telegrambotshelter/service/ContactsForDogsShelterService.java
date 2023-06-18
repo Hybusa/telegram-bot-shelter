@@ -1,7 +1,6 @@
 package pro.sky.telegrambotshelter.service;
 
 import org.springframework.stereotype.Service;
-import pro.sky.telegrambotshelter.model.ContactsForCatsShelter;
 import pro.sky.telegrambotshelter.model.ContactsForDogsShelter;
 import pro.sky.telegrambotshelter.repository.ContactsForDogsShelterRepository;
 
@@ -9,9 +8,9 @@ import java.util.List;
 
 @Service
 public class ContactsForDogsShelterService {
-    private UserService userService;
+    private final UserService userService;
 
-    private ContactsForDogsShelterRepository contactsForDogsShelterRepository;
+    private final ContactsForDogsShelterRepository contactsForDogsShelterRepository;
 
     public ContactsForDogsShelterService(UserService userService, ContactsForDogsShelterRepository contactsForDogsShelterRepository) {
         this.userService = userService;

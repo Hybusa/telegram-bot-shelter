@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import pro.sky.telegrambotshelter.listener.TelegramBotUpdatesListener;
 import pro.sky.telegrambotshelter.model.ContactsForCatsShelter;
 import pro.sky.telegrambotshelter.model.ContactsForDogsShelter;
-import pro.sky.telegrambotshelter.model.User;
 import pro.sky.telegrambotshelter.service.ContactsForCatsShelterService;
 import pro.sky.telegrambotshelter.service.ContactsForDogsShelterService;
 import pro.sky.telegrambotshelter.service.ShelterService;
@@ -34,13 +33,13 @@ public class ContactScheduler {
     /**
      * метод для отправки каждый час списка контактов волонтеру приюта для кошек
      */
-     @Scheduled(cron = "0 * * * *")
+    @Scheduled(cron = "0 0/1 * * * *")
     public void checkerForCatShelter() {
 
-        int volunteerChatIdCatsShelter = shelterService.getVolunteerChatId("Cats");
+        Long volunteerChatIdCatsShelter = shelterService.getVolunteerChatId("cats");
         List<ContactsForCatsShelter> contactsForCatsShelter = contactsForCatsShelterService.getAll();
 
-        if (contactsForCatsShelter == null)
+        if (contactsForCatsShelter.isEmpty())
             return;
         SendResponse response = telegramBot.execute(new SendMessage(volunteerChatIdCatsShelter, contactsForCatsShelter.toString()));
         if (response.isOk()) {
@@ -53,13 +52,13 @@ public class ContactScheduler {
     /**
      * метод для отправки каждый час списка контактов волонтеру приюта для собак
      */
-     @Scheduled(cron = "0 * * * *")
+    @Scheduled(cron = "0 0/1 * * * *")
     public void checkerForDogShelter() {
 
-        int volunteerChatIdDogsShelter = shelterService.getVolunteerChatId("dogs");
+        Long volunteerChatIdDogsShelter = shelterService.getVolunteerChatId("dogs");
         List<ContactsForDogsShelter> contactsForDogsShelter = contactsForDogsShelterService.getAll();
 
-        if (contactsForDogsShelter == null)
+        if (contactsForDogsShelter.isEmpty())
             return;
         SendResponse response = telegramBot.execute(new SendMessage(volunteerChatIdDogsShelter, contactsForDogsShelter.toString()));
         if (response.isOk()) {

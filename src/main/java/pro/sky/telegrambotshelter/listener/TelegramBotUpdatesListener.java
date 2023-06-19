@@ -161,11 +161,12 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 sendReportVolunteer(chatId);
                 isFinishReport = true;
                 break;
-            case "st3_cancel":
 
+            case "st3_cancel":
                 messageString = "Report canceled";
                 isFinishReport = true;
                 break;
+
             default:
                 messageString = "smth went wrong";
                 isFinishReport = true;
@@ -442,27 +443,34 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             case "st2_meeting_recommendations":
                 messageString = shelterService.getMeetingRecommendation(shelterChoiceString);
                 break;
+
             case "st2_document_list":
                 messageString = shelterService.getDocumentsList(shelterChoiceString);
                 break;
+
             case "st2_home_recommendations_young":
                 messageString = shelterService.getHomeRecommendationsYoung(shelterChoiceString);
                 break;
+
             case "st2_home_recommendations_old":
                 messageString = shelterService.getHomeRecommendationsOld(shelterChoiceString);
                 break;
+
             case "st2_home_recommendations_disability":
                 messageString = shelterService.getDisabilityRecommendations(shelterChoiceString);
                 break;
+
             case "st2_cynologist_recommendations":
                 messageString = shelterService.getCynologistRecommendations(shelterChoiceString);
                 break;
+
             case "st2_list_of_cynologists":
                 messageString = shelterService.getListOfCynologists(shelterChoiceString);
                 break;
             case "st2_why_we_can_deny":
                 messageString = shelterService.getWhyWeCanDeny(shelterChoiceString);
                 break;
+
             case "st2_call_a_volunteer":
                 SendResponse contact = telegramBot.execute(new SendContact(chatId, VOLUNTEER_PHONE_NUMBER, VOLUNTEER_NAME)
                         .allowSendingWithoutReply(true));
@@ -471,8 +479,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     logger.info(Phrases.RESPONSE_STATUS.toString(), contact);
                 else
                     logger.error(Phrases.RESPONSE_STATUS.toString() + contact.errorCode());
-
                 break;
+
             case "st2_contact_receiving":
                 SendResponse response = telegramBot.execute(new SendMessage(chatId, "Click the button to send contact info.")
                         .replyMarkup(new ReplyKeyboardMarkup(
@@ -482,8 +490,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     logger.info(Phrases.RESPONSE_STATUS.toString(), response);
                 else
                     logger.error("Error sending. Code: " + response.errorCode());
-
                 break;
+
             default:
                 messageString = "smth went wrong";
         }
@@ -705,6 +713,5 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private Optional<PhotoSize> getPicturePhotoSize(Report currentReport) {
         return currentReport.getPhotos().stream()
                 .max(Comparator.comparing(PhotoSize::fileSize));
-
     }
 }

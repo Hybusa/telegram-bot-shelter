@@ -175,4 +175,8 @@ public class UserService {
             throw new NotFoundException("User was not found by chatId");
         return optUser.get().getContact();
     }
+
+    public Optional<User> getUserByChatId(Long chatId){
+        return  userRepository.findUserByChatId(chatId);
+    }
 }

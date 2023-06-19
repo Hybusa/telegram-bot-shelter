@@ -5,7 +5,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "contacts_For_Cats_Shelter")
-public class ContactsForCatsShelter {
+public class ContactsForCatsShelter implements ContactForShelter{
     @Id
     private Long user_Id;
     private String name;
@@ -13,10 +13,10 @@ public class ContactsForCatsShelter {
     public ContactsForCatsShelter() {
     }
 
-    public ContactsForCatsShelter(Long user_Id, String name, String contact) {
-        this.user_Id = user_Id;
-        this.name = name;
-        this.contact = contact;
+    public ContactsForCatsShelter(User user) {
+        this.user_Id = user.getId();
+        this.name = user.getName();
+        this.contact = user.getContact();
     }
 
     public Long getUser_Id() {

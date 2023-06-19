@@ -2,7 +2,7 @@ package pro.sky.telegrambotshelter.service;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
-import pro.sky.telegrambotshelter.model.Report;
+import org.webjars.NotFoundException;
 import pro.sky.telegrambotshelter.model.User;
 import pro.sky.telegrambotshelter.repository.UserRepository;
 
@@ -27,7 +27,7 @@ public class UserService {
     }
 
     /**
-     * метод для изменения пользователя в БД
+     * метод для изменения выбора пользователя в БД
      */
     public void updateShelterChoiceByChatId(User user, String shelterTypeChoice) {
         Optional<User> optUser = userRepository.findUserByChatId(user.getChatId());
@@ -35,6 +35,58 @@ public class UserService {
         tmpUser = optUser.orElse(user);
         tmpUser.setShelterTypeChoice(shelterTypeChoice);
         userRepository.save(tmpUser);
+    }
+
+    /**
+     * метод для добавления контактов пользователя в БД
+     */
+    public void saveContacts(User user, String contact) {
+        Optional<User> optUser = userRepository.findUserByChatId(user.getChatId());
+        User tmpUser;
+        tmpUser = optUser.orElse(user);
+        tmpUser.setContact(contact);
+        userRepository.save(tmpUser);
+    }
+
+    /**
+     * метод для создания пользователя
+     */
+    public User createUser(User user) {
+        return userRepository.save(user);
+    }
+
+
+    /**
+     * метод для обновления пользователя
+     */
+    public Optional<User> updateUser(User user) {
+        if (userRepository.existsById(user.getId()))
+            return Optional.of(userRepository.save(user));
+        return Optional.empty();
+    }
+
+    /**
+     * метод для получения всех пользователей
+     */
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    /**
+     * метод для получения всех пользователей по типу приюта
+     */
+    public List<User> getAllUsersByShelterTypeChoice(String choice) {
+        return userRepository.findAllByShelterTypeChoice(choice);
+    }
+
+
+    /**
+     * метод удаления Пользователя по id
+     */
+    public void deleteUserById(Long id) {
+        if (!userRepository.existsById(id))
+            throw new NotFoundException("Pet id not found");
+        userRepository.deleteById(id);
     }
 
     /**
@@ -49,6 +101,20 @@ public class UserService {
                 usersId.put(user.getChatId(), user.getShelterTypeChoice());
         }
         return usersId;
+    }
+
+    public Long getUserIdByChatId(Long chatId) {
+        Optional<User> optUser = userRepository.findUserByChatId(chatId);
+        if (optUser.isEmpty())
+            throw new NotFoundException("User was not found by chatId");
+        return optUser.get().getId();
+    }
+
+    public String getUserNameByChatId(Long chatId) {
+        Optional<User> optUser = userRepository.findUserByChatId(chatId);
+        if (optUser.isEmpty())
+            throw new NotFoundException("User was not found by chatId");
+        return optUser.get().getName();
     }
 
     /**
@@ -68,17 +134,20 @@ public class UserService {
     }
 
     /**
-     * метод для получения list с контактами пользователей приюта для кошек
+     * метод для получения типа приюта пользователя
      */
-    public List<String> getListUsersContactsWithCatShelter() {
-        List<Long> usersId = new ArrayList<>(userRepository.listUsersIdFromCatsShelter());
-
-        return getContacts(usersId);
+    public String getUsersShelterTypeChoice(Long chatId) {
+        Optional<User> optUser = userRepository.findUserByChatId(chatId);
+        if (optUser.isEmpty())
+            throw new NotFoundException("User was not found by chatId");
+        return optUser.get().getShelterTypeChoice();
     }
 
-    /** Метод удаления из таблицы users по chat_iD */
-    public void deleteUsersByChatId(Long chatId){
-        Optional<User> optUser =  userRepository.findUserByChatId(chatId);
+    /**
+     * Метод удаления из таблицы users по chat_iD
+     */
+    public void deleteUsersByChatId(Long chatId) {
+        Optional<User> optUser = userRepository.findUserByChatId(chatId);
         optUser.ifPresent(userRepository::delete);
     }
 
@@ -97,6 +166,17 @@ public class UserService {
         return contactsFromCats;
     }
 
+    /**
+     * метод для получения контакта пользователя
+     */
+    public String getContact(Long chatId) {
+        Optional<User> optUser = userRepository.findUserByChatId(chatId);
+        if (optUser.isEmpty())
+            throw new NotFoundException("User was not found by chatId");
+        return optUser.get().getContact();
+    }
 
-
+    public Optional<User> getUserByChatId(Long chatId){
+        return  userRepository.findUserByChatId(chatId);
+    }
 }

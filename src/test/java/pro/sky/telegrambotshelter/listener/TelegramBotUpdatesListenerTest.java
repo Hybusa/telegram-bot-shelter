@@ -65,7 +65,7 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * 
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
     void testProcessStartNewUser() {
@@ -114,7 +114,7 @@ class TelegramBotUpdatesListenerTest {
 
 
     /**
-     * 
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
     void testProcessStartRecurringUser() {
@@ -160,7 +160,7 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * 
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
     void testProcessStage0DogsCommand() {
@@ -211,7 +211,7 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * 
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
     void testProcessStage0CatsCommand() {
@@ -263,7 +263,7 @@ class TelegramBotUpdatesListenerTest {
 
 
     /**
-     * 
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
     void testProcessStage1InfoCommand() {
@@ -304,7 +304,7 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * 
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
     void testProcessStage1ScheduleCommand() {
@@ -344,7 +344,7 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * 
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
     void testProcessStage1AddressCommand() {
@@ -385,7 +385,7 @@ class TelegramBotUpdatesListenerTest {
 
 
     /**
-     * 
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
     void testProcessStage1PathCommand() {
@@ -426,7 +426,7 @@ class TelegramBotUpdatesListenerTest {
 
 
     /**
-     * 
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
     void testProcessStage1PathSecurityPass() {
@@ -466,7 +466,7 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * 
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
     void testProcessStage1SafetyRequirements() {
@@ -507,7 +507,7 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * 
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
     void testProcessStage1CallAVolunteer() {
@@ -554,7 +554,7 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * 
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
     void testProcessStage1ContactReceiving() {
@@ -601,7 +601,7 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * 
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
     void testProcessStage2MeetingRecommendations() {
@@ -1018,7 +1018,8 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)
+     *                     @link TelegramBotUpdatesListener#stage3ChoiceUpdateParser(Update)}
      */
     @Test
     void testProcessStage3FillReport() {
@@ -1063,7 +1064,8 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)
+     *                     @link TelegramBotUpdatesListener#stage3ChoiceUpdateParser(Update)}
      */
     @Test
     void testProcessStage3SendReportDenied() {
@@ -1115,7 +1117,8 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)
+     *                     @link TelegramBotUpdatesListener#stage3ChoiceUpdateParser(Update)}
      */
     @Test
     void testProcessStage3CancelReport() {

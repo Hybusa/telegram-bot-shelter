@@ -1,8 +1,8 @@
 package pro.sky.telegrambotshelter.services;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -12,8 +12,9 @@ import pro.sky.telegrambotshelter.service.UserService;
 
 import java.util.*;
 
-import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {UserService.class})
 @ExtendWith(SpringExtension.class)
@@ -28,23 +29,24 @@ public class UserServiceTest {
     private Long chatId = 2344L;
     private User user = new User(name, chatId);
 
-    private UserService userService1;
+    @Autowired
+    private UserService userService;
 
-    @BeforeEach
-    public void initEach() {
-        userService1 = new UserService(userRepository);
-    }
+//    @BeforeEach
+//    public void initEach() {
+//        userService = new UserService(userRepository);
+//    }
 
     @Test
     void save() {
-        userService1.save(user);
+        userService.save(user);
 
         verify(userRepository).save(user);
     }
 
     @Test
     void updateShelterChoiceByChatId() {
-        userService1.updateShelterChoiceByChatId(user, shelterChoice);
+        userService.updateShelterChoiceByChatId(user, shelterChoice);
 
         verify(userRepository).findUserByChatId(user.getChatId());
         verify(userRepository).save(user);
@@ -53,7 +55,7 @@ public class UserServiceTest {
 
     @Test
     void saveContacts() {
-        userService1.saveContacts(user, contact);
+        userService.saveContacts(user, contact);
 
         verify(userRepository).findUserByChatId(user.getChatId());
         verify(userRepository).save(user);
@@ -69,7 +71,7 @@ public class UserServiceTest {
 
         when(userRepository.findAll()).thenReturn(userList);
 
-        Map<Long, String> actual = userService1.getMapUsersChatIdWithChoice();
+        Map<Long, String> actual = userService.getMapUsersChatIdWithChoice();
         assertEquals(expected, actual);
     }
 
@@ -79,7 +81,7 @@ public class UserServiceTest {
 
         when(userRepository.findUserByChatId(user.getChatId())).thenReturn(Optional.of(user));
 
-        Long actual = userService1.getUserIdByChatId(user.getChatId());
+        Long actual = userService.getUserIdByChatId(user.getChatId());
         assertEquals(user.getId(), actual);
     }
 
@@ -87,7 +89,7 @@ public class UserServiceTest {
     void getUserNameByChatId() {
         when(userRepository.findUserByChatId(user.getChatId())).thenReturn(Optional.of(user));
 
-        String actual = userService1.getUserNameByChatId(user.getChatId());
+        String actual = userService.getUserNameByChatId(user.getChatId());
         assertEquals(user.getName(), actual);
     }
 
@@ -98,7 +100,7 @@ public class UserServiceTest {
 
         when(userRepository.findById(user.get().getId())).thenReturn(user);
 
-        Optional<User> actual = userService1.getUserById(user.get().getId());
+        Optional<User> actual = userService.getUserById(user.get().getId());
         assertEquals(user, actual);
     }
 
@@ -108,7 +110,7 @@ public class UserServiceTest {
 
         when(userRepository.findUserByChatId(user.getChatId())).thenReturn(Optional.of(user));
 
-        String actual = userService1.getUsersShelterTypeChoice(user.getChatId());
+        String actual = userService.getUsersShelterTypeChoice(user.getChatId());
         assertEquals(user.getShelterTypeChoice(), actual);
     }
 
@@ -118,7 +120,7 @@ public class UserServiceTest {
 
         when(userRepository.findUserByChatId(user.getChatId())).thenReturn(Optional.of(user));
 
-        String actual = userService1.getContact(user.getChatId());
+        String actual = userService.getContact(user.getChatId());
         assertEquals(user.getContact(), actual);
     }
 }

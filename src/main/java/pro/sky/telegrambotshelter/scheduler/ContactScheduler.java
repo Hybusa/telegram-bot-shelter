@@ -44,6 +44,8 @@ public class ContactScheduler {
      */
     @Scheduled(cron = CRON)
     public void checkerForCatShelter() {
+        if(contactsForCatsShelterService.getAll().isEmpty())
+            return;
         SendResponse response = sendAndGetResponse("cats");
 
         if (response.isOk()) {
@@ -58,6 +60,8 @@ public class ContactScheduler {
      */
     @Scheduled(cron = CRON)
     public void checkerForDogShelter() {
+        if(contactsForDogsShelterService.getAll().isEmpty())
+            return;
         SendResponse response = sendAndGetResponse("dogs");
 
         if (response.isOk()) {

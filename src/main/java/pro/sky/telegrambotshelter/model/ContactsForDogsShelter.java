@@ -7,14 +7,15 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "contacts_For_Dogs_Shelter")
-public class ContactsForDogsShelter {
+public class ContactsForDogsShelter implements ContactForShelter {
 
     @Id
-    Long user_id;
+    private Long user_id;
     private String name;
     private String contact;
 
-    public ContactsForDogsShelter(){}
+    public ContactsForDogsShelter() {
+    }
 
     public ContactsForDogsShelter(Long user_id, String name, String contact) {
         this.user_id = user_id;
@@ -22,7 +23,7 @@ public class ContactsForDogsShelter {
         this.contact = contact;
     }
 
-    public Long getUser_id() {
+    public Long getUser_Id() {
         return user_id;
     }
 
@@ -64,4 +65,5 @@ public class ContactsForDogsShelter {
         return "name=" + name +
                 ", contact=" + contact + " \n";
     }
+
 }

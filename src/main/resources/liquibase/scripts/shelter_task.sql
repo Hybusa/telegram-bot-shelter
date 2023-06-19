@@ -136,6 +136,7 @@ FROM users
          JOIN contacts_for_dogs_shelter cFDS on users.id = cFDS.user_id;
 
 
+
 -- changeset m_yatsushko:4
 ALTER TABLE shelters ALTER COLUMN meeting_recommendations TYPE varchar(1000);
 ALTER TABLE shelters ALTER COLUMN how_to_get_pet TYPE varchar(1000);

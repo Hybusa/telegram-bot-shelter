@@ -14,10 +14,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.webjars.NotFoundException;
 import pro.sky.telegrambotshelter.model.Report;
 import pro.sky.telegrambotshelter.enums.ButtonCommands;
 import pro.sky.telegrambotshelter.enums.Phrases;
 import pro.sky.telegrambotshelter.model.User;
+import pro.sky.telegrambotshelter.scheduler.ContactScheduler;
 import pro.sky.telegrambotshelter.service.ContactsForCatsShelterService;
 import pro.sky.telegrambotshelter.service.ContactsForDogsShelterService;
 import pro.sky.telegrambotshelter.service.ShelterService;
@@ -53,6 +55,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private final Map<Long, Report> reports = new HashMap<Long, Report>();
     private final String VOLUNTEER_NAME = "VOLONTEER_PLACEHOLDER";
     private final String VOLUNTEER_PHONE_NUMBER = "+00000000000";
+    private final Long VOLUNTEER_CHAT_ID = 123L;//todo поменять либо брать из базы или хардкод сделать
 
     public TelegramBotUpdatesListener(TelegramBot telegramBot, ShelterService shelterService, UserService userService, ContactsForCatsShelterService contactsForCatsShelterService, ContactsForDogsShelterService contactsForDogsShelterService) {
         this.telegramBot = telegramBot;
@@ -70,8 +73,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         shelterChoice = userService.getMapUsersChatIdWithChoice();
         telegramBot.setUpdatesListener(this);
         BotCommand[] commandsArr = new BotCommand[]{
-                new BotCommand("/start", Phrases.RESTART_THE_BOT.toString())
-        };
+                        new BotCommand("/start", Phrases.RESTART_THE_BOT.toString())
+                };
         SetMyCommands commands = new SetMyCommands(commandsArr);
         commands.scope(new BotCommandScopeDefault());
         telegramBot.execute(commands);
@@ -92,6 +95,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     stage2ChoiceUpdateParser(update);
                 else if (update.callbackQuery().data().startsWith("st3"))
                     stage3ChoiceUpdateParser(update);
+                else if (update.callbackQuery().data().startsWith("vol_contact/"))
+                    contactChoiceUpdateParser(update);
 
             } else if (update.message().contact() != null) {
                 contactReceiving(update);
@@ -116,18 +121,37 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      */
     private void contactReceiving(Update update) {
 
-        long chatId = update.message().chat().id();
-        String messageText = update.message().text();
-        String shelterTypeChoice = userService.getUsersShelterTypeChoice(chatId);
+        long chatId = update.message().contact().userId();
+        String phoneNumber = update.message().contact().phoneNumber();
+        String name = update.message().contact().firstName();
 
-        //метод для сохранения контакта в юзера
-        userService.saveContacts(new User(update.callbackQuery().from().firstName(), chatId), messageText);
+        String shelterTypeChoice;
+        try {
+            shelterTypeChoice = userService.getUsersShelterTypeChoice(chatId);
+        } catch (NotFoundException e) {
+            logger.error(e.getMessage());
+            return;
+        }
+
+        //Сохранение контакта в юзера
+        User user;
+        Optional<User> optUser = userService.getUserByChatId(chatId);
+        if (optUser.isEmpty()) {
+            user = new User(name, chatId);
+            user.setContact(phoneNumber);
+            user = userService.createUser(user);
+        } else {
+            user = optUser.get();
+            user.setContact(phoneNumber);
+            userService.updateUser(user);
+
+        }
 
         //сохранение контактов в таблицу для контактов приюта собак или кошек
         if (shelterTypeChoice.equals("cats")) {
-            contactsForCatsShelterService.save(chatId, messageText);
+            contactsForCatsShelterService.save(user);
         } else if (shelterTypeChoice.equals("dogs")) {
-            contactsForDogsShelterService.save(chatId, messageText);
+            contactsForDogsShelterService.save(user);
         }
 
         SendMessage contactReceivingResponse = new SendMessage(update.message().from().id(),
@@ -171,9 +195,9 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 messageString = "smth went wrong";
                 isFinishReport = true;
         }
-        if (!messageString.isEmpty()) {
+        if (!messageString.isEmpty())
             sendMessage(chatId, messageString);
-        }
+
         if (isFinishReport) {
             reports.remove(chatId);
             telegramBot.execute(new SendMessage(chatId, "Please, choose an option from the menu")
@@ -254,37 +278,47 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 List<InlineKeyboardButton[]> inlineKeyboardButtonsList = new ArrayList<>();
                 inlineKeyboardButtonsList.add(
                         new InlineKeyboardButton[]{
-                                new InlineKeyboardButton("How to meet your pet.").callbackData("st2_meeting_recommendations")});
+                                new InlineKeyboardButton("How to meet your pet.")
+                                        .callbackData("st2_meeting_recommendations")});
                 inlineKeyboardButtonsList.add(
                         new InlineKeyboardButton[]{
-                                new InlineKeyboardButton("What documents you will need.").callbackData("st2_document_list")});
+                                new InlineKeyboardButton("What documents you will need.")
+                                        .callbackData("st2_document_list")});
                 inlineKeyboardButtonsList.add(
                         new InlineKeyboardButton[]{
-                                new InlineKeyboardButton("Recommendations for home (young pet)").callbackData("st2_home_recommendations_young")});
+                                new InlineKeyboardButton("Recommendations for home (young pet)")
+                                        .callbackData("st2_home_recommendations_young")});
                 inlineKeyboardButtonsList.add(
                         new InlineKeyboardButton[]{
-                                new InlineKeyboardButton("Recommendations for home (old)").callbackData("st2_home_recommendations_old")});
+                                new InlineKeyboardButton("Recommendations for home (old)")
+                                        .callbackData("st2_home_recommendations_old")});
                 inlineKeyboardButtonsList.add(
                         new InlineKeyboardButton[]{
-                                new InlineKeyboardButton("Recommendations for home (disability)").callbackData("st2_home_recommendations_disability")});
+                                new InlineKeyboardButton("Recommendations for home (disability)")
+                                        .callbackData("st2_home_recommendations_disability")});
 
                 if (shelterChoiceString.equals("dogs")) {
                     inlineKeyboardButtonsList.add(
                             new InlineKeyboardButton[]{
-                                    new InlineKeyboardButton("Cynologist recommendations").callbackData("st2_cynologist_recommendations")});
+                                    new InlineKeyboardButton("Cynologist recommendations")
+                                            .callbackData("st2_cynologist_recommendations")});
                     inlineKeyboardButtonsList.add(
                             new InlineKeyboardButton[]{
-                                    new InlineKeyboardButton("List of recommended cynologists").callbackData("st2_list_of_cynologists")});
+                                    new InlineKeyboardButton("List of recommended cynologists")
+                                            .callbackData("st2_list_of_cynologists")});
                 }
                 inlineKeyboardButtonsList.add(
                         new InlineKeyboardButton[]{
-                                new InlineKeyboardButton("Why we can deny adoption.").callbackData("st2_why_we_can_deny")});
+                                new InlineKeyboardButton("Why we can deny adoption.")
+                                        .callbackData("st2_why_we_can_deny")});
                 inlineKeyboardButtonsList.add(
                         new InlineKeyboardButton[]{
-                                new InlineKeyboardButton("Send my contact").callbackData("st2_contact_receiving")});
+                                new InlineKeyboardButton("Send my contact")
+                                        .callbackData("st2_contact_receiving")});
                 inlineKeyboardButtonsList.add(
                         new InlineKeyboardButton[]{
-                                new InlineKeyboardButton("Call a volunteer").callbackData("st2_call_a_volunteer")});
+                                new InlineKeyboardButton("Call a volunteer")
+                                        .callbackData("st2_call_a_volunteer")});
 
                 InlineKeyboardButton[][] inlineKeyboardButtonsArr = new InlineKeyboardButton[inlineKeyboardButtonsList.size()][1];
                 inlineKeyboardButtonsList.toArray(inlineKeyboardButtonsArr);
@@ -294,6 +328,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 choiceMessage(chatId, replyString, inlineKeyboardMarkup);
 
                 break;
+
             case "Send report":
                 inlineKeyboardMarkup = new InlineKeyboardMarkup(
                         new InlineKeyboardButton("Fill report")

@@ -1,31 +1,29 @@
 package pro.sky.telegrambotshelter.service;
 
 import org.springframework.stereotype.Service;
-import pro.sky.telegrambotshelter.model.ContactsForCatsShelter;
 import pro.sky.telegrambotshelter.model.ContactsForDogsShelter;
+import pro.sky.telegrambotshelter.model.User;
 import pro.sky.telegrambotshelter.repository.ContactsForDogsShelterRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ContactsForDogsShelterService {
-    private UserService userService;
 
-    private ContactsForDogsShelterRepository contactsForDogsShelterRepository;
 
-    public ContactsForDogsShelterService(UserService userService, ContactsForDogsShelterRepository contactsForDogsShelterRepository) {
-        this.userService = userService;
+    private final ContactsForDogsShelterRepository contactsForDogsShelterRepository;
+
+    public ContactsForDogsShelterService(ContactsForDogsShelterRepository contactsForDogsShelterRepository) {
         this.contactsForDogsShelterRepository = contactsForDogsShelterRepository;
     }
 
     /**
      * метод для сохранения контактов в таблицу ContactsForDogsShelter
      */
-    public void save(Long chatId, String contact) {
-        Long userId = userService.getUserIdByChatId(chatId);
-        String name = userService.getUserNameByChatId(chatId);
-
-        ContactsForDogsShelter contactsForDogsShelter = new ContactsForDogsShelter(userId, name, contact);
+    public void save(User user) {
+        ContactsForDogsShelter contactsForDogsShelter
+                = new ContactsForDogsShelter(user.getId(), user.getName(), user.getContact());
         contactsForDogsShelterRepository.save(contactsForDogsShelter);
     }
 
@@ -42,6 +40,16 @@ public class ContactsForDogsShelterService {
      */
     public void deleteAll(List<ContactsForDogsShelter> contactsForDogsShelter) {
         contactsForDogsShelterRepository.deleteAll(contactsForDogsShelter);
+    }
+
+    public void deleteByContact(String contact) {
+
+        Optional<ContactsForDogsShelter> optContactsForDogsShelter =
+                contactsForDogsShelterRepository.findByContact(contact);
+        optContactsForDogsShelter
+                .ifPresent(contactsForCatsShelter -> contactsForDogsShelterRepository
+                        .deleteById(contactsForCatsShelter.getUser_Id()));
+
     }
 }
 

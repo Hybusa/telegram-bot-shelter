@@ -9,10 +9,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import pro.sky.telegrambotshelter.model.Shelter;
 import pro.sky.telegrambotshelter.repository.ShelterRepository;
 import pro.sky.telegrambotshelter.service.ShelterService;
-import pro.sky.telegrambotshelter.service.UserService;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
-import static org.junit.jupiter.api.Assertions.*;
 
 
 @ContextConfiguration(classes = {ShelterService.class})
@@ -33,6 +32,7 @@ public class ShelterServiceTest {
 
     @Test
     void getVolunteerChatId() {
+
         when(shelterRepository.findShelterByShelterType(shelter.getShelterType())).thenReturn(shelter);
 
         int actual = shelterService.getVolunteerChatId(shelter.getShelterType());

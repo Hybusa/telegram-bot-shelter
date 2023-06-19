@@ -13,6 +13,7 @@ import com.pengrad.telegrambot.response.SendResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.webjars.NotFoundException;
 import pro.sky.telegrambotshelter.model.Report;
@@ -41,6 +42,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             .selective(true);
 
     private Map<Long, String> shelterChoice;
+    private final Map<Long, Report> reports = new HashMap<>();
+
 
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
 
@@ -52,10 +55,9 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private final ContactsForCatsShelterService contactsForCatsShelterService;
     private final ContactsForDogsShelterService contactsForDogsShelterService;
 
-    private final Map<Long, Report> reports = new HashMap<Long, Report>();
+
     private final String VOLUNTEER_NAME = "VOLONTEER_PLACEHOLDER";
     private final String VOLUNTEER_PHONE_NUMBER = "+00000000000";
-    private final Long VOLUNTEER_CHAT_ID = 123L;//todo поменять либо брать из базы или хардкод сделать
 
     public TelegramBotUpdatesListener(TelegramBot telegramBot, ShelterService shelterService, UserService userService, ContactsForCatsShelterService contactsForCatsShelterService, ContactsForDogsShelterService contactsForDogsShelterService) {
         this.telegramBot = telegramBot;
@@ -80,12 +82,18 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         telegramBot.execute(commands);
     }
 
+    @Scheduled(cron = "0 0 0/24 * * *")
+    private void updateFromDB(){
+        init();
+    }
+
     /**
      * Процессор Апдейтов
      */
     @Override
     public int process(List<Update> updates) {
         updates.forEach(update -> {
+            logger.info(Phrases.PROCESSING_UPDATE.toString(), update);
             if (update.callbackQuery() != null) {
                 if (update.callbackQuery().data().startsWith("st0"))
                     shelterChoiceUpdateParser(update);
@@ -105,12 +113,17 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             } else if (update.message() != null) {
                 if (update.message().contact() != null)
                     contactReceiving(update);
-                else
+                else if(update.message().text()!=null)
                     messageParser(update);
+                else{
+                    sendMessage(update.message().from().id(), "Wrong Format. You can send Photos and Text");
+                }
             } else if (update.myChatMember() != null) {
                 if (update.myChatMember().newChatMember().status() == ChatMember.Status.kicked) {
                     userService.deleteUsersByChatId(update.message().chat().id());
                 }
+            }else{
+                sendMessage(update.message().from().id(), "Wrong Format. You can send Photos and Text");
             }
         });
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
@@ -123,8 +136,13 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         int messageId = update.callbackQuery().message().messageId();
         Long chatId = update.callbackQuery().from().id();
         String data = update.callbackQuery().data();
-        String shelterChoiceString = shelterChoice.get(chatId);
-
+        String shelterChoiceString;
+        try {
+            shelterChoiceString = shelterService.getShelterTypeByVolunteerId(chatId);
+        }catch (NotFoundException e){
+            logger.error(e.getMessage());
+            return;
+        }
         String contact = data.substring(data.lastIndexOf('/') + 1);
 
         switch (shelterChoiceString) {
@@ -142,7 +160,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                         contactsForDogsShelterService);
 
         InlineKeyboardMarkup inlineKeyboardMarkup = contactScheduler
-                .createInlineKeyboardMarkup(shelterChoice.get(chatId));
+                .createInlineKeyboardMarkup(shelterChoiceString);
 
         telegramBot.execute(new EditMessageText(chatId, messageId, "Контакту " + contact +  " позвонили.")
                 .replyMarkup(inlineKeyboardMarkup));
@@ -353,7 +371,9 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                                 new InlineKeyboardButton("Call a volunteer")
                                         .callbackData("st2_call_a_volunteer")});
 
-                InlineKeyboardButton[][] inlineKeyboardButtonsArr = new InlineKeyboardButton[inlineKeyboardButtonsList.size()][1];
+                InlineKeyboardButton[][] inlineKeyboardButtonsArr =
+                        new InlineKeyboardButton[inlineKeyboardButtonsList.size()][1];
+
                 inlineKeyboardButtonsList.toArray(inlineKeyboardButtonsArr);
 
                 inlineKeyboardMarkup = new InlineKeyboardMarkup(inlineKeyboardButtonsArr);

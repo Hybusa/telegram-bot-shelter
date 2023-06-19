@@ -1025,7 +1025,6 @@ class TelegramBotUpdatesListenerTest {
     void testProcessStage3FillReport() {
         // Arrange
         List<Update> updates = new ArrayList<>();
-        String name = "Jane";
         Long chatId = 123L;
         int messageId = 223;
 
@@ -1071,7 +1070,7 @@ class TelegramBotUpdatesListenerTest {
     void testProcessStage3SendReportDenied() {
         // Arrange
         List<Update> updates = new ArrayList<>();
-        String name = "Jane";
+
         Long chatId = 123L;
         int messageId = 223;
 
@@ -1098,12 +1097,6 @@ class TelegramBotUpdatesListenerTest {
         when(telegramBot.execute(any(SendMessage.class))).thenReturn(sendResponse);
         when(telegramBot.execute(any(SendPhoto.class))).thenReturn(sendResponse);
 
-        Boolean activeReport = true;
-        Report report = mock(Report.class);
-
-        doNothing().when(report).nextStep();
-        doNothing().when(report).setActive(activeReport);
-
         updates.add(update);
 
         // Act
@@ -1124,7 +1117,7 @@ class TelegramBotUpdatesListenerTest {
     void testProcessStage3CancelReport() {
         // Arrange
         List<Update> updates = new ArrayList<>();
-        String name = "Jane";
+
         Long chatId = 123L;
         int messageId = 223;
 
@@ -1149,12 +1142,6 @@ class TelegramBotUpdatesListenerTest {
         when(sendResponse.errorCode()).thenReturn(-1);
 
         when(telegramBot.execute(any(SendMessage.class))).thenReturn(sendResponse);
-
-        Boolean activeReport = true;
-        Report report = mock(Report.class);
-
-        doNothing().when(report).nextStep();
-        doNothing().when(report).setActive(activeReport);
 
         updates.add(update);
 

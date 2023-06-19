@@ -16,8 +16,8 @@ CREATE TABLE shelters
     id                           SERIAL PRIMARY KEY,
     volunteer_chat_id            bigint,
     shelter_type                 VARCHAR(255),
-    meeting_recommendations      VARCHAR(255),
-    how_to_get_pet               VARCHAR(255),
+    meeting_recommendations      VARCHAR(1000),
+    how_to_get_pet               VARCHAR(1000),
     documents_list               VARCHAR(255),
     general_info                 VARCHAR(255),
     phone_number                 VARCHAR(255),
@@ -25,17 +25,18 @@ CREATE TABLE shelters
     address                      VARCHAR(255),
     how_to_get                   VARCHAR(255),
     security_and_pass            VARCHAR(255),
-    safety                       VARCHAR(255),
-    transporting_recommendations VARCHAR(255),
-    home_recommendations_young   VARCHAR(255),
-    home_recommendations_old     VARCHAR(255),
-    cynologist_recommendations   VARCHAR(255),
+    safety                       VARCHAR(1000),
+    transporting_recommendations VARCHAR(1000),
+    home_recommendations_young   VARCHAR(1000),
+    home_recommendations_old     VARCHAR(1000),
+    cynologist_recommendations   VARCHAR(4000),
     list_of_cynologists          VARCHAR(255),
     disability_recommendations   VARCHAR(255),
     why_we_can_deny              VARCHAR(255),
     CONSTRAINT chk_cynologist_recommendations CHECK (shelter_type = 'dogs' OR cynologist_recommendations IS NULL),
     CONSTRAINT chk_list_of_cynologists CHECK (shelter_type = 'dogs' OR list_of_cynologists IS NULL)
 );
+
 
 CREATE TABLE pets
 (
@@ -74,6 +75,7 @@ CREATE TABLE adopted_dogs
     FOREIGN KEY (id_pet) REFERENCES pets (id),
     FOREIGN KEY (id_user) REFERENCES users (id)
 );
+
 -- changeset akuznetsov:2
 SELECT *
 FROM users
@@ -102,14 +104,7 @@ FROM users
          JOIN pets ON users.id = pets.user_id
          JOIN shelters ON pets.shelters_id = shelters.id;
 
--- changeset akuznetsov:3
-CREATE TABLE user_shelter_join
-(
-    user_id    INTEGER REFERENCES users (id),
-    shelter_id INTEGER REFERENCES shelters (id)
-);
-
--- changeset a.sychkova:1
+-- changeset a.sychkova:3
 CREATE TABLE contacts_for_cats_shelter
 (
     user_id SERIAL PRIMARY KEY,
@@ -122,7 +117,7 @@ SELECT *
 FROM users
          JOIN contacts_for_cats_shelter cFCS on users.id = cFCS.user_id;
 
--- changeset a.sychkova:2
+-- changeset a.sychkova:4
 CREATE TABLE contacts_for_dogs_shelter
 (
     user_id SERIAL PRIMARY KEY,
@@ -136,14 +131,8 @@ FROM users
          JOIN contacts_for_dogs_shelter cFDS on users.id = cFDS.user_id;
 
 
--- changeset m_yatsushko:4
-ALTER TABLE shelters ALTER COLUMN meeting_recommendations TYPE varchar(1000);
-ALTER TABLE shelters ALTER COLUMN how_to_get_pet TYPE varchar(1000);
-ALTER TABLE shelters ALTER COLUMN safety TYPE varchar(1000);
-ALTER TABLE shelters ALTER COLUMN home_recommendations_young TYPE varchar(1000);
-ALTER TABLE shelters ALTER COLUMN home_recommendations_old TYPE varchar(1000);
-ALTER TABLE shelters ALTER COLUMN transporting_recommendations TYPE varchar(1000);
-ALTER TABLE shelters ALTER COLUMN cynologist_recommendations TYPE varchar(4000);
+
+-- changeset m_yatsushko:5
 
 INSERT INTO shelters (id, volunteer_chat_id, shelter_type, meeting_recommendations, how_to_get_pet,
                       documents_list, general_info, phone_number, schedule, address, how_to_get,
@@ -196,7 +185,7 @@ VALUES (0, 0, 'dogs',
         'DISABILITY RECO PLACEHOLDER',
         'Не достаточно финансов для содержания животного, нет времени на собаку');
 
--- changeset m_yatsushko:5
+-- changeset m_yatsushko:6
 INSERT INTO shelters (id, volunteer_chat_id, shelter_type, meeting_recommendations, how_to_get_pet,
                       documents_list, general_info, phone_number, schedule, address, how_to_get,
                       security_and_pass, safety, transporting_recommendations, home_recommendations_young,
@@ -232,3 +221,4 @@ VALUES (1, 1, 'cats',
         'Корми кошку и не обижай, и подчиняйся',
         'DISABILITY RECO PLACEHOLDER',
         'Не достаточно финансов для содержания животного, нет времени на кошку');
+

@@ -137,4 +137,11 @@ public class ShelterService {
     public String getListOfCynologists(String shelterType) {
         return shelterRepository.findShelterByShelterType(shelterType).getListOfCynologists().replace(",", "\n");
     }
+
+    public String getShelterTypeByVolunteerId(Long chatId) {
+        Optional<Shelter> optionalShelter = shelterRepository.findShelterByVolunteerChatId(chatId);
+        if(optionalShelter.isPresent())
+            return optionalShelter.get().getShelterType();
+        throw new NotFoundException("Such Volunteer Not Found!");
+    }
 }

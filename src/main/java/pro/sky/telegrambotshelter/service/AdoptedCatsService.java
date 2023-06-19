@@ -38,7 +38,7 @@ public class AdoptedCatsService {
      */
     public void updateLastReports(Long idUser, LocalDateTime localDateTime) {
 
-        Optional<AdoptedCats> adoptedCats = adoptedCatsRepository.findById(idUser);
+        Optional<AdoptedCats> adoptedCats = adoptedCatsRepository.findByIdUser(idUser);
 
         adoptedCats.ifPresent(entity -> {
 

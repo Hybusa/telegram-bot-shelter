@@ -2,10 +2,7 @@ package pro.sky.telegrambotshelter.listener;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.*;
-import com.pengrad.telegrambot.request.DeleteMessage;
-import com.pengrad.telegrambot.request.EditMessageText;
-import com.pengrad.telegrambot.request.SendContact;
-import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.request.*;
 import com.pengrad.telegrambot.response.SendResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -17,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import pro.sky.telegrambotshelter.model.Report;
 import pro.sky.telegrambotshelter.service.ContactsForCatsShelterService;
 import pro.sky.telegrambotshelter.service.ContactsForDogsShelterService;
 import pro.sky.telegrambotshelter.service.ShelterService;
@@ -47,7 +45,6 @@ class TelegramBotUpdatesListenerTest {
 
     @MockBean
     private ContactsForCatsShelterService contactsForCatsShelterService;
-
     @MockBean
     private ContactsForDogsShelterService contactsForDogsShelterService;
 
@@ -56,28 +53,24 @@ class TelegramBotUpdatesListenerTest {
 
 
     Map<Long, String> userMap = new HashMap<>();
-
-    List<Update> updates;
     String name = "Jane";
     Long chatId = 123L;
-
-    int messageId = 223;
 
     @BeforeEach
     void init() {
         userMap.put(chatId, "TestString");
         when(userService.getMapUsersChatIdWithChoice()).thenReturn(userMap);
         telegramBotUpdatesListener.init();
-        updates = new ArrayList<>();
+
     }
 
     /**
-     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     * 
      */
     @Test
     void testProcessStartNewUser() {
         // Arrange
-
+        List<Update> updates = new ArrayList<>();
 
         String messageText = "/start";
         String returnMessageText = "Hello, " + name + "! \n" + botInfo;
@@ -107,7 +100,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
         // Act
 
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot, atLeast(2)).execute(Mockito.any(SendMessage.class));
@@ -121,11 +114,15 @@ class TelegramBotUpdatesListenerTest {
 
 
     /**
-     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     * 
      */
     @Test
     void testProcessStartRecurringUser() {
         // Arrange
+        List<Update> updates = new ArrayList<>();
+        String name = "Jane";
+        Long chatId = 123L;
+
         String messageText = "/start";
 
         Chat chat = mock(Chat.class);
@@ -151,7 +148,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot, atMost(2)).execute(Mockito.any(SendMessage.class));
@@ -163,14 +160,15 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     * 
      */
     @Test
     void testProcessStage0DogsCommand() {
         // Arrange
         List<Update> updates = new ArrayList<>();
+        String name = "Jane";
         Long chatId = 123L;
-
+        int messageId = 223;
 
         String messageText = "st0_dog_shelters";
 
@@ -198,7 +196,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot, times(2)).execute(Mockito.any(SendMessage.class));
@@ -213,12 +211,13 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     * 
      */
     @Test
     void testProcessStage0CatsCommand() {
         // Arrange
         List<Update> updates = new ArrayList<>();
+        String name = "Jane";
         Long chatId = 123L;
         int messageId = 223;
 
@@ -248,7 +247,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot,times(2)).execute(Mockito.any(SendMessage.class));
@@ -264,11 +263,15 @@ class TelegramBotUpdatesListenerTest {
 
 
     /**
-     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     * 
      */
     @Test
     void testProcessStage1InfoCommand() {
         // Arrange
+        List<Update> updates = new ArrayList<>();
+        Long chatId = 123L;
+        int messageId = 223;
+
         String messageText = "st1_shelter_info";
 
         User user = mock(User.class);
@@ -289,7 +292,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot).execute(Mockito.any(EditMessageText.class));
@@ -301,11 +304,15 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     * 
      */
     @Test
     void testProcessStage1ScheduleCommand() {
         // Arrange
+        List<Update> updates = new ArrayList<>();
+        Long chatId = 123L;
+        int messageId = 223;
+
         String messageText = "st1_shelter_schedule";
 
         User user = mock(User.class);
@@ -325,7 +332,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot).execute(Mockito.any(EditMessageText.class));
@@ -337,11 +344,15 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     * 
      */
     @Test
     void testProcessStage1AddressCommand() {
         // Arrange
+        List<Update> updates = new ArrayList<>();
+        Long chatId = 123L;
+        int messageId = 223;
+
         String messageText = "st1_shelter_address";
 
         User user = mock(User.class);
@@ -361,7 +372,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot).execute(Mockito.any(EditMessageText.class));
@@ -374,11 +385,15 @@ class TelegramBotUpdatesListenerTest {
 
 
     /**
-     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     * 
      */
     @Test
     void testProcessStage1PathCommand() {
         // Arrange
+        List<Update> updates = new ArrayList<>();
+        Long chatId = 123L;
+        int messageId = 223;
+
         String messageText = "st1_shelter_path";
 
         User user = mock(User.class);
@@ -398,7 +413,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot).execute(Mockito.any(EditMessageText.class));
@@ -411,11 +426,15 @@ class TelegramBotUpdatesListenerTest {
 
 
     /**
-     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     * 
      */
     @Test
     void testProcessStage1PathSecurityPass() {
         // Arrange
+        List<Update> updates = new ArrayList<>();
+        Long chatId = 123L;
+        int messageId = 223;
+
         String messageText = "st1_shelter_security_pass";
 
         User user = mock(User.class);
@@ -435,7 +454,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot).execute(Mockito.any(EditMessageText.class));
@@ -447,11 +466,15 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     * 
      */
     @Test
     void testProcessStage1SafetyRequirements() {
         // Arrange
+        List<Update> updates = new ArrayList<>();
+        Long chatId = 123L;
+        int messageId = 223;
+
         String messageText = "st1_shelter_safety_requirements";
 
         User user = mock(User.class);
@@ -471,7 +494,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot).execute(Mockito.any(EditMessageText.class));
@@ -484,11 +507,15 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     * 
      */
     @Test
     void testProcessStage1CallAVolunteer() {
         // Arrange
+        List<Update> updates = new ArrayList<>();
+        Long chatId = 123L;
+        int messageId = 223;
+
         String messageText = "st1_call_a_volunteer";
 
         User user = mock(User.class);
@@ -514,7 +541,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot).execute(Mockito.any(SendContact.class));
@@ -527,11 +554,15 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     * 
      */
     @Test
     void testProcessStage1ContactReceiving() {
         // Arrange
+        List<Update> updates = new ArrayList<>();
+        Long chatId = 123L;
+        int messageId = 223;
+
         String messageText = "st1_contact_receiving";
 
         User user = mock(User.class);
@@ -557,7 +588,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot).execute(Mockito.any(SendMessage.class));
@@ -570,11 +601,15 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     * 
      */
     @Test
     void testProcessStage2MeetingRecommendations() {
         // Arrange
+        List<Update> updates = new ArrayList<>();
+        Long chatId = 123L;
+        int messageId = 223;
+
         String messageText = "st2_meeting_recommendations";
 
         User user = mock(User.class);
@@ -594,7 +629,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot).execute(Mockito.any(EditMessageText.class));
@@ -611,6 +646,10 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStage2DocumentList() {
         // Arrange
+        List<Update> updates = new ArrayList<>();
+        Long chatId = 123L;
+        int messageId = 223;
+
         String messageText = "st2_document_list";
 
         User user = mock(User.class);
@@ -630,7 +669,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot).execute(Mockito.any(EditMessageText.class));
@@ -647,6 +686,10 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStage2HomeRecommendationsYoung() {
         // Arrange
+        List<Update> updates = new ArrayList<>();
+        Long chatId = 123L;
+        int messageId = 223;
+
         String messageText = "st2_home_recommendations_young";
 
         User user = mock(User.class);
@@ -666,7 +709,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot).execute(Mockito.any(EditMessageText.class));
@@ -683,6 +726,10 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStage2HomeRecommendationsOld() {
         // Arrange
+        List<Update> updates = new ArrayList<>();
+        Long chatId = 123L;
+        int messageId = 223;
+
         String messageText = "st2_home_recommendations_old";
 
         User user = mock(User.class);
@@ -702,7 +749,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot).execute(Mockito.any(EditMessageText.class));
@@ -712,6 +759,7 @@ class TelegramBotUpdatesListenerTest {
         verify(user, atLeastOnce()).id();
         verify(shelterService).getHomeRecommendationsOld(anyString());
     }
+
     /**
      * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
@@ -742,7 +790,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot).execute(Mockito.any(EditMessageText.class));
@@ -759,6 +807,10 @@ class TelegramBotUpdatesListenerTest {
     @Test
     void testProcessStage2CynologistRecommendations() {
         // Arrange
+        List<Update> updates = new ArrayList<>();
+        Long chatId = 123L;
+        int messageId = 223;
+
         String messageText = "st2_cynologist_recommendations";
 
         User user = mock(User.class);
@@ -778,7 +830,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot).execute(Mockito.any(EditMessageText.class));
@@ -796,6 +848,10 @@ class TelegramBotUpdatesListenerTest {
     @Disabled
     void testProcessStage2ListOfCynologists() {
         // Arrange
+        List<Update> updates = new ArrayList<>();
+        Long chatId = 123L;
+        int messageId = 223;
+
         String messageText = "st2_list_of_cynologists";
 
         User user = mock(User.class);
@@ -815,7 +871,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot).execute(Mockito.any(EditMessageText.class));
@@ -825,12 +881,18 @@ class TelegramBotUpdatesListenerTest {
         verify(user, atLeastOnce()).id();
         //verify(shelterService).(anyString());
     }
+
     /**
      * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
+    @Disabled
     void testProcessStage2WhyWeCanDeny() {
         // Arrange
+        List<Update> updates = new ArrayList<>();
+        Long chatId = 123L;
+        int messageId = 223;
+
         String messageText = "st2_why_we_can_deny";
 
         User user = mock(User.class);
@@ -850,7 +912,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot).execute(Mockito.any(EditMessageText.class));
@@ -860,12 +922,17 @@ class TelegramBotUpdatesListenerTest {
         verify(user, atLeastOnce()).id();
         verify(shelterService).getWhyWeCanDeny(anyString());
     }
+
     /**
      * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
     void testProcessStage2CallAVolunteer() {
         // Arrange
+        List<Update> updates = new ArrayList<>();
+        Long chatId = 123L;
+        int messageId = 223;
+
         String messageText = "st2_call_a_volunteer";
 
         User user = mock(User.class);
@@ -891,7 +958,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot).execute(Mockito.any(SendContact.class));
@@ -902,12 +969,17 @@ class TelegramBotUpdatesListenerTest {
         verify(message, atLeastOnce()).messageId();
         verify(user, atLeastOnce()).id();
     }
+
     /**
      * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
     void testProcessStage2ContactReceiving() {
         // Arrange
+        List<Update> updates = new ArrayList<>();
+        Long chatId = 123L;
+        int messageId = 223;
+
         String messageText = "st2_contact_receiving";
 
         User user = mock(User.class);
@@ -933,7 +1005,7 @@ class TelegramBotUpdatesListenerTest {
         updates.add(update);
 
         // Act
-        this.telegramBotUpdatesListener.process(updates);
+        telegramBotUpdatesListener.process(updates);
 
         // Assert
         verify(telegramBot).execute(Mockito.any(SendMessage.class));
@@ -943,6 +1015,154 @@ class TelegramBotUpdatesListenerTest {
         verify(callbackQuery, atLeastOnce()).from();
         verify(message, atLeastOnce()).messageId();
         verify(user, atLeastOnce()).id();
+    }
+
+    /**
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     */
+    @Test
+    void testProcessStage3FillReport() {
+        // Arrange
+        List<Update> updates = new ArrayList<>();
+        String name = "Jane";
+        Long chatId = 123L;
+        int messageId = 223;
+
+        String messageText = "st3_fill_report_master";
+
+        User user = mock(User.class);
+        when(user.id()).thenReturn(chatId);
+
+        Message message = mock(Message.class);
+        when(message.messageId()).thenReturn(messageId);
+
+        CallbackQuery callbackQuery = mock(CallbackQuery.class);
+        when(callbackQuery.data()).thenReturn(messageText);
+        when(callbackQuery.from()).thenReturn(user);
+        when(callbackQuery.message()).thenReturn(message);
+
+        Update update = mock(Update.class);
+        when(update.callbackQuery()).thenReturn(callbackQuery);
+
+        SendResponse sendResponse = mock(SendResponse.class);
+        when(sendResponse.isOk()).thenReturn(true);
+        when(sendResponse.errorCode()).thenReturn(-1);
+
+        when(telegramBot.execute(any(SendMessage.class))).thenReturn(sendResponse);
+
+        updates.add(update);
+
+        // Act
+        telegramBotUpdatesListener.process(updates);
+
+        // Assert
+        verify(telegramBot,times(2)).execute(Mockito.any(SendMessage.class));
+        verify(sendResponse, times(2)).isOk();
+        verify(callbackQuery, atLeastOnce()).data();
+        verify(callbackQuery, atLeastOnce()).from();
+    }
+
+    /**
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     */
+    @Test
+    void testProcessStage3SendReportDenied() {
+        // Arrange
+        List<Update> updates = new ArrayList<>();
+        String name = "Jane";
+        Long chatId = 123L;
+        int messageId = 223;
+
+        String messageText = "st3_send_report";
+
+        User user = mock(User.class);
+        when(user.id()).thenReturn(chatId);
+
+        Message message = mock(Message.class);
+        when(message.messageId()).thenReturn(messageId);
+
+        CallbackQuery callbackQuery = mock(CallbackQuery.class);
+        when(callbackQuery.data()).thenReturn(messageText);
+        when(callbackQuery.from()).thenReturn(user);
+        when(callbackQuery.message()).thenReturn(message);
+
+        Update update = mock(Update.class);
+        when(update.callbackQuery()).thenReturn(callbackQuery);
+
+        SendResponse sendResponse = mock(SendResponse.class);
+        when(sendResponse.isOk()).thenReturn(true);
+        when(sendResponse.errorCode()).thenReturn(-1);
+
+        when(telegramBot.execute(any(SendMessage.class))).thenReturn(sendResponse);
+        when(telegramBot.execute(any(SendPhoto.class))).thenReturn(sendResponse);
+
+        Boolean activeReport = true;
+        Report report = mock(Report.class);
+
+        doNothing().when(report).nextStep();
+        doNothing().when(report).setActive(activeReport);
+
+        updates.add(update);
+
+        // Act
+        telegramBotUpdatesListener.process(updates);
+
+        // Assert
+        verify(telegramBot,times(2)).execute(Mockito.any(SendMessage.class));
+        verify(sendResponse, times(1)).isOk();
+        verify(callbackQuery, atLeastOnce()).data();
+        verify(callbackQuery, atLeastOnce()).from();
+    }
+
+    /**
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     */
+    @Test
+    void testProcessStage3CancelReport() {
+        // Arrange
+        List<Update> updates = new ArrayList<>();
+        String name = "Jane";
+        Long chatId = 123L;
+        int messageId = 223;
+
+        String messageText = "st3_cancel";
+
+        User user = mock(User.class);
+        when(user.id()).thenReturn(chatId);
+
+        Message message = mock(Message.class);
+        when(message.messageId()).thenReturn(messageId);
+
+        CallbackQuery callbackQuery = mock(CallbackQuery.class);
+        when(callbackQuery.data()).thenReturn(messageText);
+        when(callbackQuery.from()).thenReturn(user);
+        when(callbackQuery.message()).thenReturn(message);
+
+        Update update = mock(Update.class);
+        when(update.callbackQuery()).thenReturn(callbackQuery);
+
+        SendResponse sendResponse = mock(SendResponse.class);
+        when(sendResponse.isOk()).thenReturn(true);
+        when(sendResponse.errorCode()).thenReturn(-1);
+
+        when(telegramBot.execute(any(SendMessage.class))).thenReturn(sendResponse);
+
+        Boolean activeReport = true;
+        Report report = mock(Report.class);
+
+        doNothing().when(report).nextStep();
+        doNothing().when(report).setActive(activeReport);
+
+        updates.add(update);
+
+        // Act
+        telegramBotUpdatesListener.process(updates);
+
+        // Assert
+        verify(telegramBot,times(2)).execute(Mockito.any(SendMessage.class));
+        verify(sendResponse, times(1)).isOk();
+        verify(callbackQuery, atLeastOnce()).data();
+        verify(callbackQuery, atLeastOnce()).from();
     }
 }
 

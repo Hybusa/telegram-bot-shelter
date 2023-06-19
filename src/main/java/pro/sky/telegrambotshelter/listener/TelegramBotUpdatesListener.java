@@ -117,6 +117,39 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     }
 
     /**
+     * Обработка нажатия кнопки с контактом
+     * */
+    private void contactChoiceUpdateParser(Update update) {
+        int messageId = update.callbackQuery().message().messageId();
+        Long chatId = update.callbackQuery().from().id();
+        String data = update.callbackQuery().data();
+        String shelterChoiceString = shelterChoice.get(chatId);
+
+        String contact = data.substring(data.lastIndexOf('/') + 1);
+
+        switch (shelterChoiceString) {
+            case "cats":
+                contactsForCatsShelterService.deleteByContact(contact);
+                break;
+            case "dogs":
+                contactsForDogsShelterService.deleteByContact(contact);
+                break;
+        }
+        ContactScheduler contactScheduler =
+                new ContactScheduler(telegramBot,
+                        shelterService,
+                        contactsForCatsShelterService,
+                        contactsForDogsShelterService);
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = contactScheduler
+                .createInlineKeyboardMarkup(shelterChoice.get(chatId));
+
+        telegramBot.execute(new EditMessageText(chatId, messageId, "Контакту " + contact +  " позвонили.")
+                .replyMarkup(inlineKeyboardMarkup));
+    }
+
+
+    /**
      * метод для обработки входящих контактов и ответа на это сообщение
      */
     private void contactReceiving(Update update) {

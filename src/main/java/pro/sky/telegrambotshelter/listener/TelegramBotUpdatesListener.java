@@ -22,12 +22,12 @@ import pro.sky.telegrambotshelter.model.*;
 import pro.sky.telegrambotshelter.scheduler.ContactScheduler;
 import pro.sky.telegrambotshelter.scheduler.ReportsScheduler;
 import pro.sky.telegrambotshelter.service.*;
-import pro.sky.telegrambotshelter.service.*;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
@@ -702,7 +702,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
         InlineKeyboardMarkup inlineKeyboardMarkup;
 
-        List<User> tempUserIdList = new ArrayList<>();
+        List<User> tempUserIdListAddUserToShelter;
+        List<User> tempUserIdListExtendPeriod;
 
         switch (messageText) {
             case "/start":
@@ -743,20 +744,19 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
                 replyString = "Choice user to add to the shelter";
 
-                usersIdUserMap.forEach((k, v) -> {
 
-                    if (v.getShelterTypeChoice().equals(shelter.getShelterType())
-                            && !v.isFailed() && v.getShelter() == null) {
-                        tempUserIdList.add(v);
-                    }
+                tempUserIdListAddUserToShelter = usersIdUserMap.values().stream().filter(user ->
+                        user.getShelterTypeChoice()
+                                .equals(shelter.getShelterType())
+                                && !user.isFailed()
+                                && user.getShelter() == null).collect(Collectors.toList());
 
-                });
 
-                if (tempUserIdList.isEmpty()) {
+                if (tempUserIdListAddUserToShelter.isEmpty()) {
                     telegramBot.execute(new SendMessage(chatId, "Sorry no new users :("));
                 } else {
 
-                    inlineKeyboardMarkup = buttonChoiceForVolunteerToAddUser(tempUserIdList);
+                    inlineKeyboardMarkup = buttonChoiceForVolunteerToAddUser(tempUserIdListAddUserToShelter);
                     telegramBot.execute(new SendMessage(chatId, replyString)
                             .replyMarkup(inlineKeyboardMarkup));
 
@@ -768,23 +768,20 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
                 replyString = "Choice user to add additional time";
 
-                usersIdUserMap.forEach((k, v) -> {
 
-                    if (v.getShelter() != null) {
-                        if (v.getShelter().equals(shelter) && (adoptedCatsMap.get(v.getId()) != null ||
-                                adoptedDogsMap.get(v.getId()) != null)) {
-                            tempUserIdList.add(v);
-                        }
-                    }
+                tempUserIdListExtendPeriod = usersIdUserMap.values().stream().filter(user ->
+                         (adoptedCatsMap.get(user.getId()) != null ||
+                                adoptedDogsMap.get(user.getId()) != null ||
+                                 user.getShelter() != null)
+                                 && user.getShelter().equals(shelter)).collect(Collectors.toList());
 
-                });
 
-                if (tempUserIdList.isEmpty()) {
+                if (tempUserIdListExtendPeriod.isEmpty()) {
                     telegramBot.execute(new SendMessage(chatId, "Sorry no users who take a " +
                             shelterType + " :("));
                 } else {
 
-                    inlineKeyboardMarkup = buttonChoiceForVolunteerToAdditionalTimeUsers(tempUserIdList);
+                    inlineKeyboardMarkup = buttonChoiceForVolunteerToAdditionalTimeUsers(tempUserIdListExtendPeriod);
                     telegramBot.execute(new SendMessage(chatId, replyString)
                             .replyMarkup(inlineKeyboardMarkup));
 
@@ -938,7 +935,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
         String messageText = "Choice pet";
 
-        List<InlineKeyboardButton[]>  inlineKeyboardButtonsList;
+        List<InlineKeyboardButton[]> inlineKeyboardButtonsList;
         InlineKeyboardButton[][] inlineKeyboardButtonsArr;
 
         InlineKeyboardMarkup inlineKeyboardMarkup;
@@ -1133,7 +1130,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             inlineKeyboardButtons.add(
                     new InlineKeyboardButton[]{
                             new InlineKeyboardButton((i + 1) + ". " + petsWithNoUser.get(i).getName())
-                    .callbackData(petsChoice + ":" + petsWithNoUser.get(i).getId() + ":" + idUser)});
+                                    .callbackData(petsChoice + ":" + petsWithNoUser.get(i).getId() + ":" + idUser)});
 
         }
 
@@ -1489,7 +1486,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      */
     private void createReport(Long chatId) {
         //создание отчета не доступно если нет усыновленных питомцев
-        if(!petService.isExistUser(chatId)){
+        if (!petService.isExistUser(chatId)) {
             sendMessage(chatId, "You don't have adopted pets. Before sending, you must adopt pet");
             return;
         }

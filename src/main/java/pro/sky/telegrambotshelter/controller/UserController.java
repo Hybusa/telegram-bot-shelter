@@ -20,26 +20,26 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> createPet(@RequestBody User user) {
+    public ResponseEntity<User> createUser(@RequestBody User user) {
         return ResponseEntity.ok(userService.createUser(user));
     }
 
     @PutMapping
-    public ResponseEntity<User> updateShelter(@RequestBody User user) {
+    public ResponseEntity<User> updateUser(@RequestBody User user) {
         return userService.updateUser(user)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping
-    ResponseEntity<List<User>> getAllPets(@RequestParam(required = false) String shelterChoice) {
+    ResponseEntity<List<User>> getAllUser(@RequestParam(required = false) String shelterChoice) {
         if (shelterChoice == null)
             return ResponseEntity.ok(userService.getAllUsers());
         return ResponseEntity.ok(userService.getAllUsersByShelterTypeChoice(shelterChoice));
     }
 
     @GetMapping("{id}")
-    ResponseEntity<User> getPetById(@PathVariable Long id) {
+    ResponseEntity<User> getUserById(@PathVariable Long id) {
         return userService.getUserById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -47,7 +47,8 @@ public class UserController {
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteShelter(@PathVariable Long id){
+    public void deleteUser(@PathVariable Long id){
         userService.deleteUserById(id);
     }
+
 }

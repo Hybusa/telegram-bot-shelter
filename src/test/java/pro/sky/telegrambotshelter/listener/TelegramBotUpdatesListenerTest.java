@@ -14,10 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import pro.sky.telegrambotshelter.service.ContactsForCatsShelterService;
-import pro.sky.telegrambotshelter.service.ContactsForDogsShelterService;
-import pro.sky.telegrambotshelter.service.ShelterService;
-import pro.sky.telegrambotshelter.service.UserService;
+import pro.sky.telegrambotshelter.service.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,6 +38,9 @@ class TelegramBotUpdatesListenerTest {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private PetService petService;
 
     @MockBean
     private ContactsForCatsShelterService contactsForCatsShelterService;
@@ -950,7 +950,7 @@ class TelegramBotUpdatesListenerTest {
      *                     @link TelegramBotUpdatesListener#stage3ChoiceUpdateParser(Update)}
      */
     @Test
-    void testProcessStage3FillReport() {
+    void testProcessStage3FillReportDenied() {
         // Arrange
         List<Update> updates = new ArrayList<>();
         Long chatId = 123L;
@@ -984,8 +984,8 @@ class TelegramBotUpdatesListenerTest {
         telegramBotUpdatesListener.process(updates);
 
         // Assert
-        verify(telegramBot,times(2)).execute(Mockito.any(SendMessage.class));
-        verify(sendResponse, times(2)).isOk();
+        verify(telegramBot,times(1)).execute(Mockito.any(SendMessage.class));
+        verify(sendResponse, times(1)).isOk();
         verify(callbackQuery, atLeastOnce()).data();
         verify(callbackQuery, atLeastOnce()).from();
     }

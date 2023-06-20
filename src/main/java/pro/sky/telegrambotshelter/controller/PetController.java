@@ -23,7 +23,7 @@ public class PetController {
     }
 
     @PutMapping
-    public ResponseEntity<Pet> updateShelter(@RequestBody Pet pet) {
+    public ResponseEntity<Pet> updatePet(@RequestBody Pet pet) {
         return petService.updatePet(pet)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());

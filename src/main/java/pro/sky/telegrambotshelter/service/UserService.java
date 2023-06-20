@@ -176,6 +176,21 @@ public class UserService {
             throw new NotFoundException("User was not found by chatId");
         return optUser.get().getContact();
     }
+    /**
+     * получение всех пользователей в мапу (Id пользователя - пользователь)
+     * */
+    public Map<Long, User> getAllByIdNameMap() {
+
+        List<User> userList = userRepository.findAll();
+        Map<Long, User> usersIdNameMap = new HashMap<>();
+
+        for (User user: userList) {
+            usersIdNameMap.put(user.getId(), user);
+        }
+
+        return usersIdNameMap;
+
+    }
 
     public Optional<User> getUserByChatId(Long chatId){
         return  userRepository.findUserByChatId(chatId);

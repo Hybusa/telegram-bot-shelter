@@ -2,17 +2,18 @@ package pro.sky.telegrambotshelter.model;
 
 
 import javax.persistence.*;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name="shelters")
+@Table(name = "shelters")
 public class Shelter {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private long volunteerChatId;
+    private Long volunteerChatId;
 
     private String shelterType;
 
@@ -50,11 +51,13 @@ public class Shelter {
 
     private String whyWeCanDeny;
 
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "shelter")
+    private List<User> users;
 
     public Shelter() {
     }
 
-    public Shelter(int volunteerChatId,
+    public Shelter(Long volunteerChatId,
                    String shelterType,
                    String meetingRecommendations,
                    String howToGetPet,
@@ -102,11 +105,11 @@ public class Shelter {
         this.id = id;
     }
 
-    public long getVolunteerChatId() {
+    public Long getVolunteerChatId() {
         return volunteerChatId;
     }
 
-    public void setVolunteerChatId(int volunteerChatId) {
+    public void setVolunteerChatId(Long volunteerChatId) {
         this.volunteerChatId = volunteerChatId;
     }
 
@@ -252,6 +255,14 @@ public class Shelter {
 
     public void setWhyWeCanDeny(String whyWeCanDeny) {
         this.whyWeCanDeny = whyWeCanDeny;
+    }
+
+    public List<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<User> users) {
+        this.users = users;
     }
 
     @Override

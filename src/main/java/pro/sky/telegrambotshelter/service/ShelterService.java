@@ -1,9 +1,17 @@
 package pro.sky.telegrambotshelter.service;
 
+import liquibase.pro.packaged.S;
 import org.springframework.stereotype.Service;
+import pro.sky.telegrambotshelter.model.Shelter;
+import pro.sky.telegrambotshelter.model.User;
 import org.webjars.NotFoundException;
 import pro.sky.telegrambotshelter.model.Shelter;
 import pro.sky.telegrambotshelter.repository.ShelterRepository;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import java.util.List;
 import java.util.Optional;
@@ -165,6 +173,62 @@ public class ShelterService {
      */
     public String getDisabilityRecommendations(String shelterType) {
         return shelterRepository.findShelterByShelterType(shelterType).getDisabilityRecommendations();
+    }
+    /**
+     * получение всех приютов в мапу (Id чат волонтера - приют)
+     * */
+    public Map<Long, Shelter> getAllSheltersToMap() {
+
+        Map<Long, Shelter> shelterMap = new HashMap<>();
+        List<Shelter> shelterList = shelterRepository.findAll();
+
+        for (Shelter shelter: shelterList) {
+            shelterMap.put(shelter.getVolunteerChatId(), shelter);
+        }
+
+        return shelterMap;
+
+    }
+
+    /**
+     * добавление пользователя в приют
+     */
+    public void addUserToShelter (User user) {
+
+        Optional<Shelter> shelter = shelterRepository.findById(user.getShelter().getId());
+
+        shelter.ifPresent(entity -> {
+
+            List<User> usersList = entity.getUsers();
+
+            usersList.add(user);
+            entity.setUsers(usersList);
+
+            shelterRepository.save(entity);
+
+        });
+
+    }
+
+    /**
+     * удаление пользователя из приюта
+     */
+
+    public void deleteUserFromShelter(User user) {
+
+        Optional<Shelter> shelter = shelterRepository.findById(user.getShelter().getId());
+
+        shelter.ifPresent(entity -> {
+
+            List<User> usersList = entity.getUsers();
+
+            usersList.remove(user);
+            entity.setUsers(usersList);
+
+            shelterRepository.save(entity);
+
+        });
+
     }
 
     /**

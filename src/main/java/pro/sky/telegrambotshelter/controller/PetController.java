@@ -23,7 +23,7 @@ public class PetController {
     }
 
     @PutMapping
-    public ResponseEntity<Pet> updateShelter(@RequestBody Pet pet) {
+    public ResponseEntity<Pet> updatePet(@RequestBody Pet pet) {
         return petService.updatePet(pet)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -45,7 +45,7 @@ public class PetController {
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteShelter(@PathVariable Long id){
+    public void deletePet(@PathVariable Long id){
         petService.deletePet(id);
     }
 

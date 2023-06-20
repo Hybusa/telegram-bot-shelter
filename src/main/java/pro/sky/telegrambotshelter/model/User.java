@@ -21,6 +21,8 @@ public class User {
 
     private String shelterTypeChoice;
 
+    @ManyToOne
+    private Shelter shelter;
 
     public User() {
     }
@@ -76,6 +78,14 @@ public class User {
 
     public void setShelterTypeChoice(String shelterTypeChoice) {
         this.shelterTypeChoice = shelterTypeChoice;
+    }
+
+    public Shelter getShelter() {
+        return shelter;
+    }
+
+    public void setShelter(Shelter shelter) {
+        this.shelter = shelter;
     }
 
     @Override

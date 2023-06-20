@@ -45,7 +45,7 @@ public class PetController {
 
     @DeleteMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void deleteShelter(@PathVariable Long id){
+    public void deletePet(@PathVariable Long id){
         petService.deletePet(id);
     }
 

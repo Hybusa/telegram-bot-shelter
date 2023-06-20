@@ -21,7 +21,7 @@ public class ShelterServiceTest {
     @MockBean
     private ShelterRepository shelterRepository;
 
-    private final Shelter shelter = new Shelter(111, "cats", "q", "p", "w", "q", "p", "w", "q", "p", "w", "q", "p", "w", "q", "p", "w", "q", "p");
+    private final Shelter shelter = new Shelter(111L, "cats", "q", "p", "w", "q", "p", "w", "q", "p", "w", "q", "p", "w", "q", "p", "w", "q", "p");
 
     private ShelterService shelterService;
 

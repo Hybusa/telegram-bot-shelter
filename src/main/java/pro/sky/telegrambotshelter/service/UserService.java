@@ -2,6 +2,7 @@ package pro.sky.telegrambotshelter.service;
 
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
+import pro.sky.telegrambotshelter.model.Report;
 import org.webjars.NotFoundException;
 import pro.sky.telegrambotshelter.model.User;
 import pro.sky.telegrambotshelter.repository.UserRepository;
@@ -174,6 +175,21 @@ public class UserService {
         if (optUser.isEmpty())
             throw new NotFoundException("User was not found by chatId");
         return optUser.get().getContact();
+    }
+    /**
+     * получение всех пользователей в мапу (Id пользователя - пользователь)
+     * */
+    public Map<Long, User> getAllByIdNameMap() {
+
+        List<User> userList = userRepository.findAll();
+        Map<Long, User> usersIdNameMap = new HashMap<>();
+
+        for (User user: userList) {
+            usersIdNameMap.put(user.getId(), user);
+        }
+
+        return usersIdNameMap;
+
     }
 
     public Optional<User> getUserByChatId(Long chatId){

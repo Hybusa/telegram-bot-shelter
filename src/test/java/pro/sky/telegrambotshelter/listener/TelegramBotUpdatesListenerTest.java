@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import pro.sky.telegrambotshelter.scheduler.ReportsScheduler;
 import pro.sky.telegrambotshelter.service.*;
 
 import java.util.ArrayList;
@@ -45,6 +46,15 @@ class TelegramBotUpdatesListenerTest {
     private ContactsForCatsShelterService contactsForCatsShelterService;
     @MockBean
     private ContactsForDogsShelterService contactsForDogsShelterService;
+
+    @MockBean
+    private AdoptedCatsService adoptedCatsService;
+
+    @MockBean
+    private AdoptedDogsService adoptedDogsService;
+
+    @MockBean
+    private ReportsScheduler reportsScheduler;
 
     @Value("${telegram.bot.info}")
     String botInfo;

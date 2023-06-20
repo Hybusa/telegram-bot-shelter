@@ -1,17 +1,4 @@
-package pro.sky.telegrambotshelter.services;
-
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+package pro.sky.telegrambotshelter.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +10,16 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import pro.sky.telegrambotshelter.model.ContactsForDogsShelter;
 import pro.sky.telegrambotshelter.model.User;
 import pro.sky.telegrambotshelter.repository.ContactsForDogsShelterRepository;
-import pro.sky.telegrambotshelter.service.ContactsForDogsShelterService;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {ContactsForDogsShelterService.class})
 @ExtendWith(SpringExtension.class)

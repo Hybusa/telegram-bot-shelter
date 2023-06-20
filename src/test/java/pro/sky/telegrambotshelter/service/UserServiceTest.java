@@ -1,6 +1,5 @@
-package pro.sky.telegrambotshelter.services;
+package pro.sky.telegrambotshelter.service;
 
-import liquibase.pro.packaged.O;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,10 +8,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.webjars.NotFoundException;
-import pro.sky.telegrambotshelter.model.Shelter;
 import pro.sky.telegrambotshelter.model.User;
 import pro.sky.telegrambotshelter.repository.UserRepository;
-import pro.sky.telegrambotshelter.service.UserService;
 
 import java.util.*;
 
@@ -61,7 +58,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void createUser(){
+    void createUser() {
         when(userRepository.save(user)).thenReturn(user);
 
         User actual = userService.createUser(user);
@@ -69,7 +66,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateUser(){
+    void updateUser() {
         when(userRepository.existsById(user.getId())).thenReturn(true);
         when(userRepository.save(user)).thenReturn(user);
 
@@ -78,7 +75,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateUserWithOptionalEmpty(){
+    void updateUserWithOptionalEmpty() {
         when(userRepository.existsById(user.getId())).thenReturn(false);
         when(userRepository.save(user)).thenReturn(user);
 
@@ -87,8 +84,9 @@ public class UserServiceTest {
     }
 
     @Test
-    void getAllUsers(){
+    void getAllUsers() {
         List<User> expected = new ArrayList<>();
+        expected.add(user);
         when(userRepository.findAll()).thenReturn(expected);
 
         List<User> actual = userService.getAllUsers();
@@ -96,9 +94,10 @@ public class UserServiceTest {
     }
 
     @Test
-    void getAllUsersByShelterTypeChoice(){
+    void getAllUsersByShelterTypeChoice() {
         String shelterType = "cats";
         List<User> expected = new ArrayList<>();
+        expected.add(user);
         when(userRepository.findAllByShelterTypeChoice(shelterType)).thenReturn(expected);
 
         List<User> actual = userService.getAllUsersByShelterTypeChoice(shelterType);
@@ -106,7 +105,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void deleteUserById(){
+    void deleteUserById() {
         when(userRepository.existsById(user.getId())).thenReturn(true);
 
         userService.deleteUserById(user.getId());
@@ -115,7 +114,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void deleteUserByIdWithNotFoundException(){
+    void deleteUserByIdWithNotFoundException() {
         when(userRepository.existsById(user.getId())).thenReturn(false);
         String expectedMessage = "Pet id not found";
 
@@ -132,7 +131,13 @@ public class UserServiceTest {
     void getMapUsersChatIdWithChoice() {
         Map<Long, String> expected = new HashMap<>();
         List<User> userList = new ArrayList<>();
+        userList.add(user);
+        String type = "test";
+        Long chatId = 22L;
+        expected.put(chatId, type);
 
+        when(user.getChatId()).thenReturn(chatId);
+        when(user.getShelterTypeChoice()).thenReturn(type);
         when(userRepository.findAll()).thenReturn(userList);
 
         Map<Long, String> actual = userService.getMapUsersChatIdWithChoice();
@@ -141,7 +146,10 @@ public class UserServiceTest {
 
     @Test
     void getUserIdByChatId() {
-        when(userRepository.findUserByChatId(user.getChatId())).thenReturn(Optional.of(user));
+        Long id = 33L;
+
+        when(user.getId()).thenReturn(id);
+        when(userRepository.findUserByChatId(anyLong())).thenReturn(Optional.of(user));
 
         Long actual = userService.getUserIdByChatId(user.getChatId());
         assertEquals(user.getId(), actual);
@@ -171,25 +179,27 @@ public class UserServiceTest {
 
     @Test
     void getUserById() {
-        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
 
         Optional<User> actual = userService.getUserById(user.getId());
         assertEquals(Optional.of(user), actual);
     }
 
     @Test
-    void getListUsersContactsWithDodShelter(){
+    void getListUsersContactsWithDodShelter() {
         List<String> expected = new ArrayList<>();
         List<Long> id = new ArrayList<>();
 
+
         when(userRepository.listUsersIdFromDogsShelter()).thenReturn(id);
+
         List<String> actual = userService.getListUsersContactsWithDodShelter();
         assertEquals(expected, actual);
     }
 
     @Test
     void getUsersShelterTypeChoice() {
-        when(userRepository.findUserByChatId(user.getChatId())).thenReturn(Optional.of(user));
+        when(userRepository.findUserByChatId(anyLong())).thenReturn(Optional.of(user));
 
         String actual = userService.getUsersShelterTypeChoice(user.getChatId());
         assertEquals(user.getShelterTypeChoice(), actual);
@@ -197,7 +207,7 @@ public class UserServiceTest {
 
     @Test
     void getUsersShelterTypeChoiceWithNotFoundException() {
-        when(userRepository.findUserByChatId(user.getChatId())).thenReturn(Optional.empty());
+        when(userRepository.findUserByChatId(anyLong())).thenReturn(Optional.empty());
         String expectedMessage = "User was not found by chatId";
 
         Exception exception = assertThrows(
@@ -210,7 +220,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void deleteUsersByChatId(){
+    void deleteUsersByChatId() {
         when(userRepository.findUserByChatId(user.getChatId())).thenReturn(Optional.of(user));
 
         userService.deleteUsersByChatId(user.getChatId());
@@ -220,6 +230,7 @@ public class UserServiceTest {
 
     @Test
     void getContact() {
+        when(user.getContact()).thenReturn("contact");
         when(userRepository.findUserByChatId(user.getChatId())).thenReturn(Optional.of(user));
 
         String actual = userService.getContact(user.getChatId());
@@ -241,7 +252,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void getUserByChatId(){
+    void getUserByChatId() {
         when(userRepository.findUserByChatId(user.getChatId())).thenReturn(Optional.of(user));
 
         Optional<User> actual = userService.getUserByChatId(user.getChatId());

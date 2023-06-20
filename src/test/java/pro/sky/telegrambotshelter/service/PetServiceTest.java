@@ -1,4 +1,4 @@
-package pro.sky.telegrambotshelter.services;
+package pro.sky.telegrambotshelter.service;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,13 +11,13 @@ import org.webjars.NotFoundException;
 import pro.sky.telegrambotshelter.model.Pet;
 import pro.sky.telegrambotshelter.model.Shelter;
 import pro.sky.telegrambotshelter.repository.PetRepository;
-import pro.sky.telegrambotshelter.service.PetService;
-import pro.sky.telegrambotshelter.service.ShelterService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = {PetService.class})
@@ -32,7 +32,7 @@ public class PetServiceTest {
     @MockBean
     private ShelterService shelterService;
     private Pet pet;
-    private List<Pet> pets;
+    private final List<Pet> pets = new ArrayList<>();
 
     @BeforeEach
     public void initEach() {
@@ -41,7 +41,7 @@ public class PetServiceTest {
     }
 
     @Test
-    public void createPet(){
+    public void createPet() {
         when(petRepository.save(pet)).thenReturn(pet);
 
         Pet actual = petService.createPet(pet);
@@ -49,8 +49,8 @@ public class PetServiceTest {
     }
 
     @Test
-    public void updatePet(){
-        when(petRepository.existsById(pet.getId())).thenReturn(true);
+    public void updatePet() {
+        when(petRepository.existsById(anyLong())).thenReturn(true);
         when(petRepository.save(pet)).thenReturn(pet);
 
         Optional<Pet> actual = petService.updatePet(pet);
@@ -58,7 +58,8 @@ public class PetServiceTest {
     }
 
     @Test
-    public void getAllPets(){
+    public void getAllPets() {
+        pets.add(pet);
         when(petRepository.findAll()).thenReturn(pets);
 
         List<Pet> actual = petService.getAllPets();
@@ -66,8 +67,8 @@ public class PetServiceTest {
     }
 
     @Test
-    public void getAllByShelterId(){
-        when(shelterService.getShelterById(shelter.getId())).thenReturn(Optional.ofNullable(shelter));
+    public void getAllByShelterId() {
+        when(shelterService.getShelterById(anyLong())).thenReturn(Optional.of(shelter));
         when(petRepository.findAllByShelter(shelter)).thenReturn(pets);
 
         List<Pet> actual = petService.getAllByShelterId(shelter.getId());
@@ -75,7 +76,7 @@ public class PetServiceTest {
     }
 
     @Test
-    public void getAllByShelterId_WithNotFoundException(){
+    public void getAllByShelterId_WithNotFoundException() {
         when(shelterService.getShelterById(anyLong())).thenReturn(Optional.empty());
 
         String expectedMessage = "Shelter not found";
@@ -90,16 +91,16 @@ public class PetServiceTest {
 
 
     @Test
-    public void getPetById(){
-        when(petRepository.findById(pet.getId())).thenReturn(Optional.of(pet));
+    public void getPetById() {
+        when(petRepository.findById(anyLong())).thenReturn(Optional.of(pet));
 
         Optional<Pet> actual = petService.getPetById(pet.getId());
         assertEquals(Optional.of(pet), actual);
     }
 
     @Test
-    public void deletePet(){
-        when(petRepository.existsById(pet.getId())).thenReturn(true);
+    public void deletePet() {
+        when(petRepository.existsById(anyLong())).thenReturn(true);
 
         petService.deletePet(pet.getId());
 
@@ -107,8 +108,8 @@ public class PetServiceTest {
     }
 
     @Test
-    public void deletePet_WithNotFoundException(){
-        when(petRepository.existsById(anyLong())).thenReturn(false);
+    public void deletePet_WithNotFoundException() {
+        when(!petRepository.existsById(anyLong())).thenReturn(false);
 
         String expectedMessage = "Pet id not found";
 

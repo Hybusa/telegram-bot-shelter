@@ -26,7 +26,7 @@ public class ContactScheduler {
     private final ShelterService shelterService;
     private final ContactsForCatsShelterService contactsForCatsShelterService;
     private final ContactsForDogsShelterService contactsForDogsShelterService;
-    private final String CRON = "10 * * * * *";
+
 
 
     public ContactScheduler(TelegramBot telegramBot,
@@ -42,7 +42,7 @@ public class ContactScheduler {
     /**
      * метод для отправки каждый час списка контактов волонтеру приюта для кошек
      */
-    @Scheduled(cron = CRON)
+    @Scheduled(cron = "${interval-scheduled-contacts}")
     public void checkerForCatShelter() {
         if(contactsForCatsShelterService.getAll().isEmpty())
             return;
@@ -58,7 +58,7 @@ public class ContactScheduler {
     /**
      * метод для отправки каждый час списка контактов волонтеру приюта для собак
      */
-    @Scheduled(cron = CRON)
+    @Scheduled(cron = "${interval-scheduled-contacts}")
     public void checkerForDogShelter() {
         if(contactsForDogsShelterService.getAll().isEmpty())
             return;

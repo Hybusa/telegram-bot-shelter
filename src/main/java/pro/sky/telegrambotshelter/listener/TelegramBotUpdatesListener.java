@@ -22,6 +22,7 @@ import pro.sky.telegrambotshelter.model.*;
 import pro.sky.telegrambotshelter.scheduler.ContactScheduler;
 import pro.sky.telegrambotshelter.scheduler.ReportsScheduler;
 import pro.sky.telegrambotshelter.service.*;
+import pro.sky.telegrambotshelter.service.*;
 
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
@@ -61,7 +62,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private final ShelterService shelterService;
 
     private final UserService userService;
-
     private final ContactsForCatsShelterService contactsForCatsShelterService;
 
     private final ContactsForDogsShelterService contactsForDogsShelterService;
@@ -290,7 +290,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         boolean isFinishReport = false;
         switch (update.callbackQuery().data()) {
             case "st3_fill_report_master":
-                sendMessage(chatId, "report in progress...");
                 createReport(chatId);
                 break;
 
@@ -1489,6 +1488,14 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      * Метод делает активным отчет, т.е. дальнейшие сообщения являются данными отчета
      */
     private void createReport(Long chatId) {
+        //создание отчета не доступно если нет усыновленных питомцев
+        if(!petService.isExistUser(chatId)){
+            sendMessage(chatId, "You don't have adopted pets. Before sending, you must adopt pet");
+            return;
+        }
+
+        sendMessage(chatId, "report in progress...");
+
         Report currentReport = reports.get(chatId);
 
         if (currentReport == null) {
@@ -1606,10 +1613,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      */
     private void sendReportUser(Report currentReport, Long chatId) {
 
-        if (!currentReport.isActive() || getPicturePhotoSize(currentReport).isPresent()) {
-            //получаем фото для отчета
-            Optional<PhotoSize> optionalPhotoSize = getPicturePhotoSize(currentReport);
+        Optional<PhotoSize> optionalPhotoSize = getPicturePhotoSize(currentReport);
+        if (!currentReport.isActive() && optionalPhotoSize.isPresent()) {
 
+            //получаем фото для отчета
             String f_id = optionalPhotoSize.get().fileId();
             SendPhoto reportMessage = new SendPhoto(chatId, f_id);
 
@@ -1638,9 +1645,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             return;
         }
 
-        if (!currentReport.isActive()) {
+        Optional<PhotoSize> optionalPhotoSize = getPicturePhotoSize(currentReport);
+        if (!currentReport.isActive() && optionalPhotoSize.isPresent()) {
             //получаем фото для отчета
-            Optional<PhotoSize> optionalPhotoSize = getPicturePhotoSize(currentReport);
+
             String f_id = optionalPhotoSize.get().fileId();
             SendPhoto reportMessage = new SendPhoto(shelterService.getVolunteerChatId(shelterChoice.get(chatId)), f_id);
 

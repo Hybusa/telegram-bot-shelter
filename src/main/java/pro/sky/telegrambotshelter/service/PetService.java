@@ -81,4 +81,9 @@ public class PetService {
             throw new NotFoundException("Pet id not found");
         petRepository.deleteById(id);
     }
+
+    /**метод определяет наличие усыновленного питомца по chat id*/
+    public boolean isExistUser(Long chatId){
+        return petRepository.getPetByUser_ChatId(chatId).isPresent();
+    }
 }

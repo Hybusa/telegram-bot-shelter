@@ -5,7 +5,6 @@ import com.pengrad.telegrambot.model.*;
 import com.pengrad.telegrambot.request.*;
 import com.pengrad.telegrambot.response.SendResponse;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -14,10 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import pro.sky.telegrambotshelter.service.ContactsForCatsShelterService;
-import pro.sky.telegrambotshelter.service.ContactsForDogsShelterService;
-import pro.sky.telegrambotshelter.service.ShelterService;
-import pro.sky.telegrambotshelter.service.UserService;
+import pro.sky.telegrambotshelter.service.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,6 +37,9 @@ class TelegramBotUpdatesListenerTest {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private PetService petService;
 
     @MockBean
     private ContactsForCatsShelterService contactsForCatsShelterService;
@@ -714,7 +713,6 @@ class TelegramBotUpdatesListenerTest {
      * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
-    @Disabled
     void testProcessStage2DisabilityRecommendations() {
         // Arrange
         List<Update> updates = new ArrayList<>();
@@ -748,7 +746,7 @@ class TelegramBotUpdatesListenerTest {
         verify(callbackQuery, atLeastOnce()).from();
         verify(message, atLeastOnce()).messageId();
         verify(user, atLeastOnce()).id();
-       // verify(shelterService).(anyString());
+        verify(shelterService).getDisabilityRecommendations(anyString());
     }
 
     /**
@@ -791,7 +789,6 @@ class TelegramBotUpdatesListenerTest {
      * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
-    @Disabled
     void testProcessStage2ListOfCynologists() {
         // Arrange
         String messageText = "st2_list_of_cynologists";
@@ -821,7 +818,7 @@ class TelegramBotUpdatesListenerTest {
         verify(callbackQuery, atLeastOnce()).from();
         verify(message, atLeastOnce()).messageId();
         verify(user, atLeastOnce()).id();
-        //verify(shelterService).(anyString());
+        verify(shelterService).getListOfCynologists(anyString());
     }
     /**
      * Method under test: {@link TelegramBotUpdatesListener#process(List)}
@@ -946,11 +943,86 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * Method under test: {@link TelegramBotUpdatesListener#process(List)
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     */
+    @Test
+    void testContactChoiceUpdateParser_cats() {
+        // Arrange
+        String messageText = "vol_contact/+7916";
+        String choice = "cats";
+
+        User user = mock(User.class);
+        when(user.id()).thenReturn(chatId);
+
+        Message message = mock(Message.class);
+        when(message.messageId()).thenReturn(messageId);
+
+        CallbackQuery callbackQuery = mock(CallbackQuery.class);
+        when(callbackQuery.data()).thenReturn(messageText);
+        when(callbackQuery.from()).thenReturn(user);
+        when(callbackQuery.message()).thenReturn(message);
+
+        when(shelterService.getShelterTypeByVolunteerId(anyLong())).thenReturn(choice);
+
+        Update update = mock(Update.class);
+        when(update.callbackQuery()).thenReturn(callbackQuery);
+
+        updates.add(update);
+
+        // Act
+        telegramBotUpdatesListener.process(updates);
+
+        // Assert
+        verify(telegramBot).execute(Mockito.any(EditMessageText.class));
+        verify(callbackQuery, atLeastOnce()).data();
+        verify(callbackQuery, atLeastOnce()).from();
+        verify(message, atLeastOnce()).messageId();
+        verify(user, atLeastOnce()).id();
+    }
+
+    @Test
+    void testContactChoiceUpdateParser_dogs() {
+        // Arrange
+        String messageText = "vol_contact/+7916";
+        String choice = "dogs";
+
+        User user = mock(User.class);
+        when(user.id()).thenReturn(chatId);
+
+        Message message = mock(Message.class);
+        when(message.messageId()).thenReturn(messageId);
+
+        CallbackQuery callbackQuery = mock(CallbackQuery.class);
+        when(callbackQuery.data()).thenReturn(messageText);
+        when(callbackQuery.from()).thenReturn(user);
+        when(callbackQuery.message()).thenReturn(message);
+
+        when(shelterService.getShelterTypeByVolunteerId(anyLong())).thenReturn(choice);
+
+        Update update = mock(Update.class);
+        when(update.callbackQuery()).thenReturn(callbackQuery);
+
+        updates.add(update);
+
+        // Act
+        telegramBotUpdatesListener.process(updates);
+
+        // Assert
+        verify(telegramBot).execute(Mockito.any(EditMessageText.class));
+        verify(callbackQuery, atLeastOnce()).data();
+        verify(callbackQuery, atLeastOnce()).from();
+        verify(message, atLeastOnce()).messageId();
+        verify(user, atLeastOnce()).id();
+    }
+
+
+
+    /**
+     * Methods under test: {@link TelegramBotUpdatesListener#process(List)
      *                     @link TelegramBotUpdatesListener#stage3ChoiceUpdateParser(Update)}
      */
     @Test
-    void testProcessStage3FillReport() {
+    void testProcessStage3FillReportDenied() {
         // Arrange
         List<Update> updates = new ArrayList<>();
         Long chatId = 123L;
@@ -984,8 +1056,8 @@ class TelegramBotUpdatesListenerTest {
         telegramBotUpdatesListener.process(updates);
 
         // Assert
-        verify(telegramBot,times(2)).execute(Mockito.any(SendMessage.class));
-        verify(sendResponse, times(2)).isOk();
+        verify(telegramBot,times(1)).execute(Mockito.any(SendMessage.class));
+        verify(sendResponse, times(1)).isOk();
         verify(callbackQuery, atLeastOnce()).data();
         verify(callbackQuery, atLeastOnce()).from();
     }

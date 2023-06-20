@@ -192,7 +192,6 @@ public class UserService {
 
     }
 
-
     public Optional<User> getUserByChatId(Long chatId){
         return  userRepository.findUserByChatId(chatId);
     }

@@ -1660,7 +1660,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 //информируем пользователя, что ответ отправлен
                 sendMessage(chatId, "Report was send");
 
-                //todo Запись даты в базу как последняя отправка
                 AtomicReference<User> userAtm = new AtomicReference<>(new User());
 
                 usersIdUserMap.forEach((k, v) -> {

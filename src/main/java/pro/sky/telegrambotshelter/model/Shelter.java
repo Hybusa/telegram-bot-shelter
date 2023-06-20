@@ -13,7 +13,7 @@ public class Shelter {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private long volunteerChatId;
+    private Long volunteerChatId;
 
     private String shelterType;
 
@@ -57,7 +57,7 @@ public class Shelter {
     public Shelter() {
     }
 
-    public Shelter(int volunteerChatId,
+    public Shelter(Long volunteerChatId,
                    String shelterType,
                    String meetingRecommendations,
                    String howToGetPet,
@@ -105,11 +105,11 @@ public class Shelter {
         this.id = id;
     }
 
-    public long getVolunteerChatId() {
+    public Long getVolunteerChatId() {
         return volunteerChatId;
     }
 
-    public void setVolunteerChatId(int volunteerChatId) {
+    public void setVolunteerChatId(Long volunteerChatId) {
         this.volunteerChatId = volunteerChatId;
     }
 

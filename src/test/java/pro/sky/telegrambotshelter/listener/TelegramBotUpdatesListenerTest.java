@@ -5,7 +5,6 @@ import com.pengrad.telegrambot.model.*;
 import com.pengrad.telegrambot.request.*;
 import com.pengrad.telegrambot.response.SendResponse;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -763,7 +762,6 @@ class TelegramBotUpdatesListenerTest {
      * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
-    @Disabled
     void testProcessStage2DisabilityRecommendations() {
         // Arrange
         List<Update> updates = new ArrayList<>();
@@ -797,7 +795,7 @@ class TelegramBotUpdatesListenerTest {
         verify(callbackQuery, atLeastOnce()).from();
         verify(message, atLeastOnce()).messageId();
         verify(user, atLeastOnce()).id();
-       // verify(shelterService).(anyString());
+        verify(shelterService).getDisabilityRecommendations(anyString());
     }
 
     /**
@@ -844,7 +842,6 @@ class TelegramBotUpdatesListenerTest {
      * Method under test: {@link TelegramBotUpdatesListener#process(List)}
      */
     @Test
-    @Disabled
     void testProcessStage2ListOfCynologists() {
         // Arrange
         List<Update> updates = new ArrayList<>();
@@ -878,7 +875,7 @@ class TelegramBotUpdatesListenerTest {
         verify(callbackQuery, atLeastOnce()).from();
         verify(message, atLeastOnce()).messageId();
         verify(user, atLeastOnce()).id();
-        //verify(shelterService).(anyString());
+        verify(shelterService).getListOfCynologists(anyString());
     }
 
     /**
@@ -1017,7 +1014,82 @@ class TelegramBotUpdatesListenerTest {
     }
 
     /**
-     * Method under test: {@link TelegramBotUpdatesListener#process(List)
+     * Method under test: {@link TelegramBotUpdatesListener#process(List)}
+     */
+    @Test
+    void testContactChoiceUpdateParser_cats() {
+        // Arrange
+        String messageText = "vol_contact/+7916";
+        String choice = "cats";
+
+        User user = mock(User.class);
+        when(user.id()).thenReturn(chatId);
+
+        Message message = mock(Message.class);
+        when(message.messageId()).thenReturn(messageId);
+
+        CallbackQuery callbackQuery = mock(CallbackQuery.class);
+        when(callbackQuery.data()).thenReturn(messageText);
+        when(callbackQuery.from()).thenReturn(user);
+        when(callbackQuery.message()).thenReturn(message);
+
+        when(shelterService.getShelterTypeByVolunteerId(anyLong())).thenReturn(choice);
+
+        Update update = mock(Update.class);
+        when(update.callbackQuery()).thenReturn(callbackQuery);
+
+        updates.add(update);
+
+        // Act
+        telegramBotUpdatesListener.process(updates);
+
+        // Assert
+        verify(telegramBot).execute(Mockito.any(EditMessageText.class));
+        verify(callbackQuery, atLeastOnce()).data();
+        verify(callbackQuery, atLeastOnce()).from();
+        verify(message, atLeastOnce()).messageId();
+        verify(user, atLeastOnce()).id();
+    }
+
+    @Test
+    void testContactChoiceUpdateParser_dogs() {
+        // Arrange
+        String messageText = "vol_contact/+7916";
+        String choice = "dogs";
+
+        User user = mock(User.class);
+        when(user.id()).thenReturn(chatId);
+
+        Message message = mock(Message.class);
+        when(message.messageId()).thenReturn(messageId);
+
+        CallbackQuery callbackQuery = mock(CallbackQuery.class);
+        when(callbackQuery.data()).thenReturn(messageText);
+        when(callbackQuery.from()).thenReturn(user);
+        when(callbackQuery.message()).thenReturn(message);
+
+        when(shelterService.getShelterTypeByVolunteerId(anyLong())).thenReturn(choice);
+
+        Update update = mock(Update.class);
+        when(update.callbackQuery()).thenReturn(callbackQuery);
+
+        updates.add(update);
+
+        // Act
+        telegramBotUpdatesListener.process(updates);
+
+        // Assert
+        verify(telegramBot).execute(Mockito.any(EditMessageText.class));
+        verify(callbackQuery, atLeastOnce()).data();
+        verify(callbackQuery, atLeastOnce()).from();
+        verify(message, atLeastOnce()).messageId();
+        verify(user, atLeastOnce()).id();
+    }
+
+
+
+    /**
+     * Methods under test: {@link TelegramBotUpdatesListener#process(List)
      *                     @link TelegramBotUpdatesListener#stage3ChoiceUpdateParser(Update)}
      */
     @Test

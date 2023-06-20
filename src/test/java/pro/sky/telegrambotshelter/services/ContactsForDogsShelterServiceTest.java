@@ -1,76 +1,115 @@
 package pro.sky.telegrambotshelter.services;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import pro.sky.telegrambotshelter.model.ContactsForDogsShelter;
+import pro.sky.telegrambotshelter.model.User;
 import pro.sky.telegrambotshelter.repository.ContactsForDogsShelterRepository;
 import pro.sky.telegrambotshelter.service.ContactsForDogsShelterService;
-import pro.sky.telegrambotshelter.service.UserService;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {ContactsForDogsShelterService.class})
 @ExtendWith(SpringExtension.class)
-public class ContactsForDogsShelterServiceTest {
-
+class ContactsForDogsShelterServiceTest {
     @MockBean
     private ContactsForDogsShelterRepository contactsForDogsShelterRepository;
 
-    @MockBean
-    private UserService userService;
-
+    @Autowired
     private ContactsForDogsShelterService contactsForDogsShelterService;
 
-    private Long userId = 333L;
-    private Long chatId = 222L;
-    private String name = "Sam";
-    private String userContact = "33333";
-    private final ContactsForDogsShelter contact = new ContactsForDogsShelter(userId, name, userContact);
+    /**
+     * Method under test: {@link ContactsForDogsShelterService#save(User)}
+     */
+    @Test
+    void testSave_CorrectParams_VerifyMethodCall() {
+        ContactsForDogsShelter contactsForDogsShelter = new ContactsForDogsShelter();
+        contactsForDogsShelter.setContact("Contact");
+        contactsForDogsShelter.setName("Name");
+        when(contactsForDogsShelterRepository.save(Mockito.any()))
+                .thenReturn(contactsForDogsShelter);
 
-    @BeforeEach
-    public void initEach() {
-        contactsForDogsShelterService = new ContactsForDogsShelterService(contactsForDogsShelterRepository);
+        User user = new User();
+        user.setChatId(1L);
+        user.setContact("Contact");
+        user.setFailed(true);
+        user.setId(1L);
+        user.setName("Name");
+        user.setShelterTypeChoice("Shelter Type Choice");
+        contactsForDogsShelterService.save(user);
+        verify(contactsForDogsShelterRepository).save(Mockito.any());
     }
 
+    /**
+     * Method under test: {@link ContactsForDogsShelterService#getAll()}
+     */
     @Test
-    @Disabled
-    void save() {
-        when(userService.getUserIdByChatId(chatId)).thenReturn(userId);
-        when(userService.getUserNameByChatId(chatId)).thenReturn(name);
-
-        //contactsForDogsShelterService.save(chatId, userContact);
-
-        verify(contactsForDogsShelterRepository).save(contact);
+    void testGetAll_CorrectParams_VerifyMethodCall() {
+        ArrayList<ContactsForDogsShelter> contactsForDogsShelterList = new ArrayList<>();
+        when(contactsForDogsShelterRepository.findAllContacts()).thenReturn(contactsForDogsShelterList);
+        List<ContactsForDogsShelter> actualAll = contactsForDogsShelterService.getAll();
+        assertSame(contactsForDogsShelterList, actualAll);
+        assertTrue(actualAll.isEmpty());
+        verify(contactsForDogsShelterRepository).findAllContacts();
     }
 
+    /**
+     * Method under test: {@link ContactsForDogsShelterService#deleteAll(List)}
+     */
     @Test
-    void getAll() {
-        List<ContactsForDogsShelter> contactsForDogsShelters = new ArrayList<>();
-        contactsForDogsShelters.add(contact);
-
-        when(contactsForDogsShelterRepository.findAllContacts()).thenReturn(contactsForDogsShelters);
-
-        List<ContactsForDogsShelter> actual = contactsForDogsShelterService.getAll();
-        assertEquals(contactsForDogsShelters, actual);
+    void testDeleteAll_CorrectParams_VerifyMethodCall() {
+        doNothing().when(contactsForDogsShelterRepository).deleteAll(Mockito.<Iterable<ContactsForDogsShelter>>any());
+        contactsForDogsShelterService.deleteAll(new ArrayList<>());
+        verify(contactsForDogsShelterRepository).deleteAll(Mockito.<Iterable<ContactsForDogsShelter>>any());
     }
 
+    /**
+     * Method under test: {@link ContactsForDogsShelterService#deleteByContact(String)}
+     */
     @Test
-    void deleteAll() {
-        List<ContactsForDogsShelter> contactsForDogsShelters = new ArrayList<>();
-        contactsForDogsShelters.add(contact);
+    void testDeleteByContact_CorrectParams_VerifyMethodCall() {
+        ContactsForDogsShelter contactsForDogsShelter = mock(ContactsForDogsShelter.class);
+        when(contactsForDogsShelter.getUser_Id()).thenReturn(1L);
+        doNothing().when(contactsForDogsShelter).setContact(Mockito.anyString());
+        doNothing().when(contactsForDogsShelter).setName(Mockito.anyString());
+        contactsForDogsShelter.setContact("Contact");
+        contactsForDogsShelter.setName("Name");
+        Optional<ContactsForDogsShelter> ofResult = Optional.of(contactsForDogsShelter);
+        doNothing().when(contactsForDogsShelterRepository).deleteById(anyLong());
+        when(contactsForDogsShelterRepository.findByContact(anyString())).thenReturn(ofResult);
+        contactsForDogsShelterService.deleteByContact("Contact");
+        verify(contactsForDogsShelterRepository).findByContact(anyString());
+        verify(contactsForDogsShelterRepository).deleteById(anyLong());
+        verify(contactsForDogsShelter).getUser_Id();
+        verify(contactsForDogsShelter).setContact(anyString());
+        verify(contactsForDogsShelter).setName(anyString());
+    }
 
-        contactsForDogsShelterService.deleteAll(contactsForDogsShelters);
-
-        verify(contactsForDogsShelterRepository).deleteAll(contactsForDogsShelters);
+    /**
+     * Method under test: {@link ContactsForDogsShelterService#deleteByContact(String)}
+     */
+    @Test
+    void testDeleteByContact_ContactIdNotFound_DoNothing_MethodCallsVerified() {
+        doNothing().when(contactsForDogsShelterRepository).deleteById(anyLong());
+        when(contactsForDogsShelterRepository.findByContact(anyString())).thenReturn(Optional.empty());
+        contactsForDogsShelterService.deleteByContact("Contact");
+        verify(contactsForDogsShelterRepository).findByContact(anyString());
     }
 }
+

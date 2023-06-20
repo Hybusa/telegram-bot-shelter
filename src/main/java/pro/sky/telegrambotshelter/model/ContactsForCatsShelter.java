@@ -23,10 +23,6 @@ public class ContactsForCatsShelter implements ContactForShelter{
         return user_Id;
     }
 
-    public void setUser_Id(Long user_Id) {
-        this.user_Id = user_Id;
-    }
-
     public String getName() {
         return name;
     }

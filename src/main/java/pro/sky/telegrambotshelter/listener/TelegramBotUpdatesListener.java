@@ -26,6 +26,7 @@ import pro.sky.telegrambotshelter.service.*;
 import javax.annotation.PostConstruct;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
@@ -1652,8 +1653,45 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 sendMessage(chatId, "Report was send");
 
                 //todo Запись даты в базу как последняя отправка
-                //curentReport.getChatId()
-                //LocalDateTime localDateTime = LocalDateTime.now();
+                AtomicReference<User> userAtm = new AtomicReference<>(new User());
+
+                usersIdUserMap.forEach((k, v) -> {
+                    if (v.getChatId().equals(chatId)) {
+                        userAtm.set(v);
+                    }
+                });
+
+                User user = userAtm.get();
+                Long idUser = user.getId();
+
+                String shelterType = user.getShelter().getShelterType();
+
+                LocalDateTime localDateTime = LocalDateTime.now();
+
+                switch (shelterType) {
+
+                    case "cats":
+
+                        AdoptedCats adoptedCats = adoptedCatsMap.get(idUser);
+
+                        adoptedCats.setLastReportDate(localDateTime);
+                        adoptedCatsMap.put(idUser, adoptedCats);
+                        adoptedCatsService.updateLastReports(idUser, localDateTime);
+
+                        break;
+
+                    case "dogs":
+
+                        AdoptedDogs adoptedDogs = adoptedDogsMap.get(idUser);
+
+                        adoptedDogs.setLastReportDate(localDateTime);
+                        adoptedDogsMap.put(idUser, adoptedDogs);
+                        adoptedDogsService.updateLastReports(idUser, localDateTime);
+
+                    default:
+                        throw new NotFoundException("Dont find any user!");
+                }
+
             } else
                 sendMessage(chatId, "Report didn't send to Volunteer. Try again");
         } else

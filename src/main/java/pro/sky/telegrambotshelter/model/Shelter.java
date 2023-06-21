@@ -270,7 +270,7 @@ public class Shelter {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Shelter shelter = (Shelter) o;
-        return volunteerChatId == shelter.volunteerChatId
+        return volunteerChatId.equals(shelter.volunteerChatId)
                 && Objects.equals(shelterType, shelter.shelterType)
                 && Objects.equals(meetingRecommendations, shelter.meetingRecommendations)
                 && Objects.equals(howToGetPet, shelter.howToGetPet)

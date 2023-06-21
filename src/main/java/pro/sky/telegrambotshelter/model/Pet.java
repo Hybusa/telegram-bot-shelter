@@ -1,5 +1,7 @@
 package pro.sky.telegrambotshelter.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.Objects;
 
@@ -20,6 +22,7 @@ public class Pet {
     private User user;
 
     @OneToOne
+    @JsonIgnore
     @JoinColumn(name = "shelters_id")
     private Shelter shelter;
 

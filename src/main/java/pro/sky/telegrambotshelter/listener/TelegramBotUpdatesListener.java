@@ -45,7 +45,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
             new String[]{"Set user pet", "Add user to shelter"},
             new String[]{"Add to user additional time to the user trial period",
                     "Select a user who fills out the report poorly"},
-            new String[]{"Set user that he failed probation", "Check reports"})
+            new String[]{"Set user that he failed probation"})
             .resizeKeyboard(true)
             .selective(true);
 
@@ -56,6 +56,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
     private Map<Long, User> usersIdUserMap;
     private Map<Long, Pet> idPetMap;
     private final Map<Long, Report> reports = new HashMap<>();
+
     private final Logger logger = LoggerFactory.getLogger(TelegramBotUpdatesListener.class);
 
     private final TelegramBot telegramBot;
@@ -336,7 +337,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 if (shelterChoice.containsKey(chatId)) {
                     restartBot(chatId, userName);
                 } else {
-
                     User user = new User(userName, chatId);
 
                     userService.save(user);
@@ -498,11 +498,18 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      * Обработка ответа на кнопку выбора типа приюта
      */
     private void shelterChoiceUpdateParser(Update update) {
+
         Long chatId = update.callbackQuery().from().id();
         String messageString;
+        Long userId = userService.getUserIdByChatId(chatId);
+        User user = usersIdUserMap.get(userId);
+
         switch (update.callbackQuery().data()) {
             case "st0_cat_shelters":
                 shelterChoice.put(chatId, "cats");
+                user.setShelterTypeChoice("cats");
+                usersIdUserMap.put(userId, user);
+
                 userService.updateShelterChoiceByChatId(
                         new User(update.callbackQuery().from().firstName(), chatId), "cats"
                 );
@@ -510,6 +517,9 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 break;
             case "st0_dog_shelters":
                 shelterChoice.put(chatId, "dogs");
+                user.setShelterTypeChoice("dogs");
+                usersIdUserMap.put(userId, user);
+
                 userService.updateShelterChoiceByChatId(
                         new User(update.callbackQuery().from().firstName(), chatId), "dogs"
                 );
@@ -797,13 +807,13 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     telegramBot.execute(new SendMessage(chatId, "Sorry no users who take a " +
                             shelterType + " :("));
                 } else {
-
                     inlineKeyboardMarkup = buttonsChoiceForVolunteerUsersHaveBadReport(tempUserIdListBadReport);
 
                     telegramBot.execute(new SendMessage(chatId, replyString)
                             .replyMarkup(inlineKeyboardMarkup));
 
                 }
+                break;
 
             case "Set user that he failed probation":
 

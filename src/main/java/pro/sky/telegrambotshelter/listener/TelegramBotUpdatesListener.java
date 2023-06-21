@@ -43,7 +43,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
     private final Keyboard VOLUNTEER_KEYBOARD_MARKUP = new ReplyKeyboardMarkup(
             new String[]{"Set user pet", "Add user to shelter"},
-            new String[]{"Add to user additional time to the user trial period"},
+            new String[]{"Add to user additional time to the user trial period",
+                    "Select a user who fills out the report poorly"},
             new String[]{"Set user that he failed probation", "Check reports"})
             .resizeKeyboard(true)
             .selective(true);
@@ -159,6 +160,8 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     addAdditionalTimeToUsers(update);
                 else if (update.callbackQuery().data().startsWith("days"))
                     addAdditionalTimeToAdoptedPet(update);
+                else if(update.callbackQuery().data().startsWith("bad_report"))
+                    badReportUser(update);
                 else if (update.callbackQuery().data().startsWith("vol_contact/"))
                     contactChoiceUpdateParser(update);
 
@@ -704,6 +707,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
         List<User> tempUserIdListAddUserToShelter;
         List<User> tempUserIdListExtendPeriod;
+        List<User> tempUserIdListBadReport;
 
         switch (messageText) {
             case "/start":
@@ -744,13 +748,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
                 replyString = "Choice user to add to the shelter";
 
-
-                tempUserIdListAddUserToShelter = usersIdUserMap.values().stream().filter(user ->
-                        user.getShelterTypeChoice()
-                                .equals(shelter.getShelterType())
+                tempUserIdListAddUserToShelter = usersIdUserMap.values().stream()
+                        .filter(user -> user.getShelterTypeChoice() != null)
+                        .filter(user -> user.getShelterTypeChoice().equals(shelter.getShelterType())
                                 && !user.isFailed()
                                 && user.getShelter() == null).collect(Collectors.toList());
-
 
                 if (tempUserIdListAddUserToShelter.isEmpty()) {
                     telegramBot.execute(new SendMessage(chatId, "Sorry no new users :("));
@@ -769,12 +771,7 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 replyString = "Choice user to add additional time";
 
 
-                tempUserIdListExtendPeriod = usersIdUserMap.values().stream().filter(user ->
-                         (adoptedCatsMap.get(user.getId()) != null ||
-                                adoptedDogsMap.get(user.getId()) != null ||
-                                 user.getShelter() != null)
-                                 && user.getShelter().equals(shelter)).collect(Collectors.toList());
-
+                tempUserIdListExtendPeriod = collectUsersToListWhoTakePetByShelter(shelter);
 
                 if (tempUserIdListExtendPeriod.isEmpty()) {
                     telegramBot.execute(new SendMessage(chatId, "Sorry no users who take a " +
@@ -788,6 +785,25 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 }
 
                 break;
+
+
+            case "Select a user who fills out the report poorly":
+
+                replyString = "Choice user who send bad report";
+
+                tempUserIdListBadReport = collectUsersToListWhoTakePetByShelter(shelter);
+
+                if (tempUserIdListBadReport.isEmpty()) {
+                    telegramBot.execute(new SendMessage(chatId, "Sorry no users who take a " +
+                            shelterType + " :("));
+                } else {
+
+                    inlineKeyboardMarkup = buttonsChoiceForVolunteerUsersHaveBadReport(tempUserIdListBadReport);
+
+                    telegramBot.execute(new SendMessage(chatId, replyString)
+                            .replyMarkup(inlineKeyboardMarkup));
+
+                }
 
             case "Set user that he failed probation":
 
@@ -817,6 +833,37 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 sendMessage(chatId, replyString);
 
         }
+
+    }
+
+    /**
+     * поиск пользователей у кого есть питомцы на содержании по типу приюта
+     */
+    private List<User> collectUsersToListWhoTakePetByShelter(Shelter shelter) {
+
+        return usersIdUserMap.values().stream().filter(user ->
+                (adoptedCatsMap.get(user.getId()) != null ||
+                        adoptedDogsMap.get(user.getId()) != null ||
+                        user.getShelter() != null)
+                        && user.getShelter().equals(shelter)).collect(Collectors.toList());
+
+    }
+
+    /**
+     * генерация кнопок для выбора пользователя кто плохо заполняет отчет
+     */
+    private InlineKeyboardMarkup buttonsChoiceForVolunteerUsersHaveBadReport(List<User> users) {
+
+        InlineKeyboardButton[][] inlineKeyboardButtons = new InlineKeyboardButton[users.size()][1];
+
+        for (int i = 0; i < inlineKeyboardButtons.length; i++) {
+
+            inlineKeyboardButtons[i][0] = new InlineKeyboardButton((i + 1) + ". " + users.get(i).getName())
+                    .callbackData("bad_report:" + users.get(i).getId());
+
+        }
+
+        return new InlineKeyboardMarkup(inlineKeyboardButtons);
 
     }
 
@@ -1432,6 +1479,31 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
 
         telegramBot.execute(new SendMessage(user.getChatId(), "You have been added to the shelter as" +
                 " an adopter of pets by volunteer. Congratulation!!!"));
+
+    }
+
+    /**
+     * отправка сообщений пользователю, что он плохо заполняет отчет
+     */
+    private void badReportUser(Update update) {
+
+        String[] data = update.callbackQuery().data().split(":");
+
+        Long idUser = Long.valueOf(data[1]);
+        Long chatId = update.callbackQuery().message().chat().id();
+
+        Integer messageId = update.callbackQuery().message().messageId();
+
+        User user = usersIdUserMap.get(idUser);
+
+        telegramBot.execute(new DeleteMessage(chatId, messageId));
+        telegramBot.execute(new SendMessage(chatId, "User " + user.getName() + " has been warned that the report" +
+                " is poorly filled out "));
+
+        telegramBot.execute(new SendMessage(user.getChatId(), "Dear adoptive parent, we have noticed that" +
+                " you are not filling out the report in as much detail as necessary." + "\n"
+                + "Please take a more responsible approach to this activity." + "\n"
+                + "Otherwise, the shelter volunteers will be required to personally check the conditions of the animal."));
 
     }
 

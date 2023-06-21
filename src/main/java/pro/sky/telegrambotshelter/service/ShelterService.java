@@ -1,23 +1,67 @@
 package pro.sky.telegrambotshelter.service;
 
+import liquibase.pro.packaged.S;
 import org.springframework.stereotype.Service;
+import pro.sky.telegrambotshelter.model.Shelter;
+import pro.sky.telegrambotshelter.model.User;
+import org.webjars.NotFoundException;
+import pro.sky.telegrambotshelter.model.Shelter;
 import pro.sky.telegrambotshelter.repository.ShelterRepository;
 
-/**
- * сервис для работы с БД приютов
- */
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import java.util.List;
+import java.util.Optional;
+
+/**сервис для работы с БД приютов*/
 @Service
 public class ShelterService {
     private final ShelterRepository shelterRepository;
+
 
     public ShelterService(ShelterRepository shelterRepository) {
         this.shelterRepository = shelterRepository;
     }
 
-    /**
-     * метод для получения id волонтера
-     */
-    public int getVolunteerChatId(String shelterType) {
+    /**метод для создания нового приюта*/
+    public Shelter createShelter(Shelter shelter){
+        return shelterRepository.save(shelter);
+    }
+
+    /**метод для получения всех приютов*/
+    public List<Shelter> getAllShelters() {
+        return shelterRepository.findAll();
+    }
+
+    /**метод для получения всех приютов по типу*/
+    public List<Shelter> getAllByShelterType(String shelterType){
+        return shelterRepository.findAllByShelterType(shelterType);
+    }
+
+    /**метод для получения приюта по id*/
+    public Optional<Shelter> getShelterById(Long id){
+        return shelterRepository.findById(id);
+    }
+
+    /**метод для родактирования приюта*/
+    public Optional<Shelter> updateShelter(Shelter shelter) {
+        if(shelterRepository.existsById(shelter.getId()))
+            return Optional.of(shelterRepository.save(shelter));
+        return Optional.empty();
+    }
+
+    /**метод для удаления приюта*/
+    public void deleteShelter(Long id){
+        if(!shelterRepository.existsById(id))
+            throw new NotFoundException("Shelter id not found");
+        shelterRepository.deleteById(id);
+    }
+
+    /**метод для получения id волонтера*/
+    public long getVolunteerChatId(String shelterType) {
         return shelterRepository.findShelterByShelterType(shelterType).getVolunteerChatId();
     }
 
@@ -129,6 +173,62 @@ public class ShelterService {
      */
     public String getDisabilityRecommendations(String shelterType) {
         return shelterRepository.findShelterByShelterType(shelterType).getDisabilityRecommendations();
+    }
+    /**
+     * получение всех приютов в мапу (Id чат волонтера - приют)
+     * */
+    public Map<Long, Shelter> getAllSheltersToMap() {
+
+        Map<Long, Shelter> shelterMap = new HashMap<>();
+        List<Shelter> shelterList = shelterRepository.findAll();
+
+        for (Shelter shelter: shelterList) {
+            shelterMap.put(shelter.getVolunteerChatId(), shelter);
+        }
+
+        return shelterMap;
+
+    }
+
+    /**
+     * добавление пользователя в приют
+     */
+    public void addUserToShelter (User user) {
+
+        Optional<Shelter> shelter = shelterRepository.findById(user.getShelter().getId());
+
+        shelter.ifPresent(entity -> {
+
+            List<User> usersList = entity.getUsers();
+
+            usersList.add(user);
+            entity.setUsers(usersList);
+
+            shelterRepository.save(entity);
+
+        });
+
+    }
+
+    /**
+     * удаление пользователя из приюта
+     */
+
+    public void deleteUserFromShelter(User user) {
+
+        Optional<Shelter> shelter = shelterRepository.findById(user.getShelter().getId());
+
+        shelter.ifPresent(entity -> {
+
+            List<User> usersList = entity.getUsers();
+
+            usersList.remove(user);
+            entity.setUsers(usersList);
+
+            shelterRepository.save(entity);
+
+        });
+
     }
 
     /**

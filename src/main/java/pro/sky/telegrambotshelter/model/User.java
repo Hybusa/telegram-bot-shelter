@@ -1,5 +1,7 @@
 package pro.sky.telegrambotshelter.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 import java.util.Objects;
 
@@ -22,6 +24,7 @@ public class User {
     private String shelterTypeChoice;
 
     @ManyToOne
+    @JsonIgnore
     private Shelter shelter;
 
     public User() {

@@ -40,6 +40,7 @@ class ShelterControllerTest {
         shelter = new Shelter();
         shelter.setId(idShelter);
         shelter.setShelterType(shelterType);
+        shelter.setVolunteerChatId(1L);
 
     }
 

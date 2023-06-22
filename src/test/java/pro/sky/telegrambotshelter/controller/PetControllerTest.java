@@ -11,12 +11,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import pro.sky.telegrambotshelter.model.Pet;
 import pro.sky.telegrambotshelter.model.Shelter;
+import pro.sky.telegrambotshelter.model.User;
 import pro.sky.telegrambotshelter.service.PetService;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -31,17 +33,33 @@ class PetControllerTest {
     private PetService petService;
 
     private Pet pet;
-    private Shelter shelter;
+    //private Shelter shelter;
+
+   // private User user;
+
 
     @BeforeEach
     public void init() {
 
-        shelter = new Shelter();
+        Long idUser = 1L;
+        String nameUser = "Виталик";
+        String shelterChoice = "cats";
+
+        Shelter shelter = new Shelter();
         shelter.setId(1L);
         shelter.setShelterType("cats");
+        shelter.setVolunteerChatId(1L);
+
+        User user = new User();
+        user.setId(idUser);
+        user.setName(nameUser);
+        user.setShelterTypeChoice(shelterChoice);
+
 
         pet = new Pet("Тигра", 5, "хороший и лаcковый кот", null, shelter);
         pet.setId(0L);
+        pet.setShelter(shelter);
+        pet.setUser(user);
 
     }
 
@@ -69,7 +87,7 @@ class PetControllerTest {
     }
 
     @Test
-    void updateShelter_success() throws Exception{
+    void updateShelter_success() throws Exception {
 
         //Input data preparation
 
@@ -77,7 +95,7 @@ class PetControllerTest {
 
         //Preparing the expected result
 
-        when(petService.updatePet(pet)).thenReturn(Optional.ofNullable(pet));
+        when(petService.updatePet(any(Pet.class))).thenReturn(Optional.of(pet));
 
         //Test start
 
@@ -91,7 +109,7 @@ class PetControllerTest {
     }
 
     @Test
-    void getAllPets_success() throws Exception{
+    void getAllPets_success() throws Exception {
 
         //Input data preparation
 

@@ -61,17 +61,25 @@ class TelegramBotUpdatesListenerTest {
 
 
     Map<Long, String> userMap = new HashMap<>();
-
+    Map<Long, pro.sky.telegrambotshelter.model.User> userIdMap = new HashMap<>();
     List<Update> updates;
     String name = "Jane";
     Long chatId = 123L;
+
+    pro.sky.telegrambotshelter.model.User user = new pro.sky.telegrambotshelter.model.User(name, chatId);
+
+    Long userId = 0L;
 
     int messageId = 223;
 
     @BeforeEach
     void init() {
         userMap.put(chatId, "TestString");
+        user.setId(userId);
+        userIdMap.put(userId,user);
         when(userService.getMapUsersChatIdWithChoice()).thenReturn(userMap);
+        when(userService.getAllByIdNameMap()).thenReturn(userIdMap);
+
         telegramBotUpdatesListener.init();
 
         updates = new ArrayList<>();

@@ -165,15 +165,11 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                     badReportUser(update);
                 else if (update.callbackQuery().data().startsWith("vol_contact/"))
                     contactChoiceUpdateParser(update);
-
-            } else if (update.message().contact() != null) {
-                contactReceiving(update);
-            } else if (update.message().photo() != null) {
-                parseReport(update);
             } else if (update.message() != null) {
                 if (update.message().contact() != null)
                     contactReceiving(update);
-
+                else if (update.message().photo() != null)
+                    parseReport(update);
                 else if (shelters.containsKey(update.message().chat().id()))
                     volunteerMessageParser(update);
 
@@ -184,8 +180,10 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
                 }
             } else if (update.myChatMember() != null) {
                 if (update.myChatMember().newChatMember().status() == ChatMember.Status.kicked) {
-                    userService.deleteUsersByChatId(update.message().chat().id());
+                   // userService.deleteUsersByChatId(update.myChatMember().chat().id());
                 }
+                else
+                    userService.save(new User(update.myChatMember().chat().firstName(), update.myChatMember().chat().id()));
             } else {
                 sendMessage(update.message().from().id(), "Wrong Format. You can send Photos and Text");
             }
@@ -498,7 +496,6 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
      * Обработка ответа на кнопку выбора типа приюта
      */
     private void shelterChoiceUpdateParser(Update update) {
-
         Long chatId = update.callbackQuery().from().id();
         String messageString;
         Long userId = userService.getUserIdByChatId(chatId);
@@ -1791,5 +1788,4 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         return currentReport.getPhotos().stream()
                 .max(Comparator.comparing(PhotoSize::fileSize));
     }
-
 }
